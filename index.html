@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的个人作品集</title>
+    <style>
+        body { font-family: sans-serif; margin: 0; text-align: center; background: #f4f4f4; }
+        header { background: #333; color: white; padding: 2rem; }
+        .gallery { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            gap: 15px; padding: 20px; 
+        }
+        .photo { background: white; padding: 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .photo img { width: 100%; border-radius: 4px; }
+        footer { padding: 1rem; color: #666; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>欢迎来到我的摄影空间</h1>
+        <p>这是我用 GitHub Pages 搭建的第一个网站</p>
+    </header>
+
+    <div class="gallery">
+        <div class="photo">
+            <img src="https://picsum.photos/600/400?random=1" alt="作品1">
+            <p>作品描述 01</p>
+        </div>
+        <div class="photo">
+            <img src="https://picsum.photos/600/400?random=2" alt="作品2">
+            <p>作品描述 02</p>
+        </div>
+        <div class="photo">
+            <img src="https://picsum.photos/600/400?random=3" alt="作品3">
+            <p>作品描述 03</p>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 我的个人网站 | Powered by GitHub Pages</p>
+    </footer>
+</body>
+</html>
