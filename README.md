@@ -1,2 +1,2 @@
-# dailylife
-雪云飞星的日常生活
+# Photography
+雪云飞星的Photography
