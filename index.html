@@ -1,45 +1,232 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的个人作品集</title>
+    <title>雪云飞星的摄影日志 | 捕捉瞬间的光影</title>
+    <!-- 引入 Tailwind CSS 和 高级字体 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+    <!-- 引入 Lucide 图标库 -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        body { font-family: sans-serif; margin: 0; text-align: center; background: #f4f4f4; }
-        header { background: #333; color: white; padding: 2rem; }
-        .gallery { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
-            gap: 15px; padding: 20px; 
+        :root {
+            --bg-color: #1a1c1e; /* 深石板青背景 */
+            --accent-color: #c5a059; /* 香槟金点缀 */
+            --text-main: #e2e2e2;
+            --text-muted: #a0a0a0;
         }
-        .photo { background: white; padding: 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .photo img { width: 100%; border-radius: 4px; }
-        footer { padding: 1rem; color: #666; font-size: 0.8rem; }
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+        }
+        h1, h2, h3, .font-serif {
+            font-family: 'Playfair Display', serif;
+        }
+        .hero-bg {
+            background: linear-gradient(rgba(26, 28, 30, 0.4), rgba(26, 28, 30, 0.8)), 
+                        url('https://images.unsplash.com/photo-1492691523567-6170f0275df1?auto=format&fit=crop&q=80&w=1600') center/cover no-repeat;
+        }
+        .glass-nav {
+            background: rgba(26, 28, 30, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(197, 160, 89, 0.2);
+        }
+        .accent-border {
+            border-color: rgba(197, 160, 89, 0.3);
+        }
+        .hover-gold:hover {
+            color: var(--accent-color);
+        }
+        .btn-gold {
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+        }
+        .btn-gold:hover {
+            background-color: var(--accent-color);
+            color: var(--bg-color);
+        }
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-color); }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent-color); }
     </style>
 </head>
-<body>
-    <header>
-        <h1>欢迎来到我的摄影空间</h1>
-        <p>这是我用 GitHub Pages 搭建的第一个网站</p>
-    </header>
+<body class="antialiased">
 
-    <div class="gallery">
-        <div class="photo">
-            <img src="https://picsum.photos/600/400?random=1" alt="作品1">
-            <p>作品描述 01</p>
+    <!-- 导航栏 -->
+    <nav class="glass-nav fixed w-full z-50 px-8 py-5 flex justify-between items-center">
+        <div class="text-2xl font-serif italic tracking-tighter text-[#c5a059]">雪云飞星</div>
+        <div class="hidden md:flex space-x-10 text-xs uppercase tracking-[0.2em] font-medium">
+            <a href="#home" class="hover-gold transition-colors">首页</a>
+            <a href="#principles" class="hover-gold transition-colors">摄像原理</a>
+            <a href="#gallery" class="hover-gold transition-colors">作品集</a>
+            <a href="#about" class="hover-gold transition-colors">关于我</a>
         </div>
-        <div class="photo">
-            <img src="https://picsum.photos/600/400?random=2" alt="作品2">
-            <p>作品描述 02</p>
+        <button class="md:hidden text-[#c5a059]"><i data-lucide="menu"></i></button>
+    </nav>
+
+    <!-- 英雄区 (Hero Section) -->
+    <section id="home" class="hero-bg h-screen flex flex-col justify-center items-center text-center px-4">
+        <h1 class="text-6xl md:text-8xl font-bold mb-6 tracking-tight text-white">雪云飞星 <span class="font-light italic text-[0.6em] block md:inline md:ml-4 text-[#c5a059]">Photography</span></h1>
+        <p class="text-sm md:text-base font-light tracking-[0.5em] text-gray-400 mb-10 uppercase">探索光线的轨迹 · 记录时间的纹理</p>
+        <div class="flex space-x-4">
+            <a href="#principles" class="btn-gold px-10 py-3 transition-all duration-500 tracking-widest text-xs uppercase">阅读笔记</a>
+            <a href="#gallery" class="bg-white/10 backdrop-blur-md px-10 py-3 hover:bg-white hover:text-black transition-all duration-500 tracking-widest text-xs uppercase text-white">浏览画廊</a>
         </div>
-        <div class="photo">
-            <img src="https://picsum.photos/600/400?random=3" alt="作品3">
-            <p>作品描述 03</p>
+    </section>
+
+    <!-- 摄像原理板块 (Photography Principles) -->
+    <section id="principles" class="py-32 bg-[#141618]">
+        <div class="max-w-6xl mx-auto px-8">
+            <div class="mb-16">
+                <h2 class="text-4xl font-serif mb-4 italic">摄像原理</h2>
+                <div class="w-20 h-1 bg-[#c5a059]"></div>
+                <p class="mt-4 text-gray-500 uppercase tracking-widest text-xs">Technical Insights & Visual Logic</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <!-- 原理文章 1: 曝光三要素 (恢复) -->
+                <article class="group cursor-pointer">
+                    <div class="overflow-hidden mb-6 aspect-video bg-neutral-800">
+                        <img src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80" alt="曝光三要素">
+                    </div>
+                    <span class="text-[#c5a059] text-xs font-medium tracking-widest uppercase">光影基础</span>
+                    <h3 class="text-2xl mt-3 mb-4 group-hover:text-[#c5a059] transition-colors">解析曝光三要素：快门、感光度与光圈的博弈</h3>
+                    <p class="text-gray-500 leading-relaxed text-sm">如何平衡进光量与画质？在不同光影条件下，理解互易律是掌握摄影主动权的基石...</p>
+                    <div class="mt-6 flex items-center text-xs text-gray-400">
+                        <span class="mr-4">2025.12.15</span>
+                        <span class="w-8 h-[1px] bg-gray-700 mr-4"></span>
+                        <span class="hover:text-white">阅读全文</span>
+                    </div>
+                </article>
+
+                <!-- 原理文章 2: 镜头原理 (更新) -->
+                <article class="group cursor-pointer">
+                    <div class="overflow-hidden mb-6 aspect-video bg-neutral-800">
+                        <img src="https://images.unsplash.com/photo-1616423641454-ec0f46c666f7?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80" alt="镜头原理">
+                    </div>
+                    <span class="text-[#c5a059] text-xs font-medium tracking-widest uppercase">镜头科学</span>
+                    <h3 class="text-2xl mt-3 mb-4 group-hover:text-[#c5a059] transition-colors">镜头原理：焦距、变焦与对焦的空间重塑</h3>
+                    <p class="text-gray-500 leading-relaxed text-sm">解析镜头内部结构如何改变光路。深入探讨定焦与变焦的选择，以及物理对焦行程对虚化效果的影响...</p>
+                    <div class="mt-6 flex items-center text-xs text-gray-400">
+                        <span class="mr-4">2025.12.18</span>
+                        <span class="w-8 h-[1px] bg-gray-700 mr-4"></span>
+                        <span class="hover:text-white">阅读全文</span>
+                    </div>
+                </article>
+            </div>
         </div>
+    </section>
+
+    <!-- 摄影作品预览 (Gallery) -->
+    <section id="gallery" class="py-32 px-8 max-w-7xl mx-auto">
+        <div class="text-center mb-20">
+            <h2 class="text-4xl font-serif italic mb-2">精选瞬间</h2>
+            <p class="text-[#c5a059] text-xs tracking-[0.3em] uppercase">The Art of Stillness</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <!-- 作品 1 -->
+            <div class="md:col-span-2 md:row-span-2 relative overflow-hidden bg-neutral-900 group cursor-crosshair" onclick="openModal('https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&q=80&w=1200')">
+                <img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&q=80&w=1200" class="w-full h-full object-cover transition-all duration-1000 group-hover:scale-110" alt="风光">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col justify-end p-8">
+                    <h4 class="text-lg font-serif italic">极境之光</h4>
+                    <p class="text-xs text-gray-400 tracking-widest mt-2 uppercase">Lofoten, Norway</p>
+                </div>
+            </div>
+            <!-- 作品 2 -->
+            <div class="aspect-square relative overflow-hidden bg-neutral-900 group cursor-crosshair" onclick="openModal('https://images.unsplash.com/photo-1472214103451-9374bd1c798e?auto=format&fit=crop&q=80&w=800')">
+                <img src="https://images.unsplash.com/photo-1472214103451-9374bd1c798e?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover transition-all duration-1000 group-hover:scale-110" alt="风光">
+                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center">
+                    <i data-lucide="maximize-2" class="text-white w-6 h-6"></i>
+                </div>
+            </div>
+            <!-- 作品 3 -->
+            <div class="aspect-square relative overflow-hidden bg-neutral-900 group cursor-crosshair" onclick="openModal('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&q=80&w=800')">
+                <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover transition-all duration-1000 group-hover:scale-110" alt="森林">
+                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center">
+                    <i data-lucide="maximize-2" class="text-white w-6 h-6"></i>
+                </div>
+            </div>
+            <!-- 作品 4 -->
+            <div class="md:col-span-2 aspect-video relative overflow-hidden bg-neutral-900 group cursor-crosshair" onclick="openModal('https://images.unsplash.com/photo-1493246507139-91e8bef99c02?auto=format&fit=crop&q=80&w=1200')">
+                <img src="https://images.unsplash.com/photo-1493246507139-91e8bef99c02?auto=format&fit=crop&q=80&w=1200" class="w-full h-full object-cover transition-all duration-1000 group-hover:scale-110" alt="雪山">
+                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center">
+                    <i data-lucide="maximize-2" class="text-white w-6 h-6"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 关于我 (About) -->
+    <section id="about" class="py-32 bg-[#1a1c1e] accent-border border-t">
+        <div class="max-w-4xl mx-auto px-8 grid md:grid-cols-2 gap-16 items-center">
+            <div class="relative">
+                <div class="aspect-[3/4] bg-neutral-800 rounded-sm overflow-hidden border border-white/5">
+                    <img src="https://images.unsplash.com/photo-1554080353-a576cf803bda?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover grayscale sepia-[.2]" alt="雪云飞星">
+                </div>
+                <div class="absolute -bottom-6 -right-6 w-32 h-32 border border-[#c5a059]/30 -z-10"></div>
+            </div>
+            <div class="text-left">
+                <h2 class="text-4xl font-serif italic mb-6">关于作者</h2>
+                <p class="text-gray-400 leading-relaxed mb-6 font-light">
+                    我是雪云飞星，一名专注于自然风光与数字影像技术的探索者。在我看来，快门不仅是记录，更是一种对万物规律的转译。
+                </p>
+                <p class="text-gray-400 leading-relaxed mb-8 font-light">
+                    在这里，我将分享我在摄像原理上的钻研心得，以及那些打动过我的光影瞬间。
+                </p>
+                <div class="flex space-x-6 text-[#c5a059]">
+                    <a href="#" class="hover:text-white transition-colors"><i data-lucide="instagram" class="w-5 h-5"></i></a>
+                    <a href="#" class="hover:text-white transition-colors"><i data-lucide="camera" class="w-5 h-5"></i></a>
+                    <a href="#" class="hover:text-white transition-colors"><i data-lucide="mail" class="w-5 h-5"></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="py-16 border-t border-white/5 text-center text-gray-600">
+        <p class="text-xs tracking-[0.4em] uppercase mb-4">雪云飞星摄影日志 · 2025</p>
+        <div class="w-10 h-[1px] bg-[#c5a059] mx-auto mb-4"></div>
+        <p class="text-[10px] italic">"Light is the origin of all things."</p>
+    </footer>
+
+    <!-- 灯箱 (Lightbox) -->
+    <div id="modal" class="fixed inset-0 bg-[#0a0a0a]/98 z-[100] hidden flex items-center justify-center p-8 cursor-zoom-out" onclick="closeModal()">
+        <img id="modalImg" class="max-w-full max-h-full shadow-2xl transition-transform duration-500 scale-95" src="" alt="">
     </div>
 
-    <footer>
-        <p>&copy; 2025 我的个人网站 | Powered by GitHub Pages</p>
-    </footer>
+    <script>
+        lucide.createIcons();
+
+        function openModal(src) {
+            const modal = document.getElementById('modal');
+            const img = document.getElementById('modalImg');
+            img.src = src;
+            modal.classList.remove('hidden');
+            setTimeout(() => img.classList.remove('scale-95'), 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            const img = document.getElementById('modalImg');
+            img.classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        window.onscroll = function() {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 80) {
+                nav.classList.add('shadow-2xl');
+                nav.style.padding = '1rem 2rem';
+            } else {
+                nav.classList.remove('shadow-2xl');
+                nav.style.padding = '1.25rem 2rem';
+            }
+        };
+    </script>
 </body>
 </html>
