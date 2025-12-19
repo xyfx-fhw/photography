@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>光影的轨迹 - 镜头物理光学原理详解</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            /* 背景改为更深的纯黑系 */
+            --bg-body: #000000;
+            --bg-panel: rgba(20, 20, 20, 0.7);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --accent: #3b82f6;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+        }
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            /* 极暗的背景，仅保留微弱的中心光感 */
+            background-image: radial-gradient(circle at 50% 0%, #111111 0%, #000000 100%);
+            min-height: 100vh;
+        }
+        /* 细微的网格装饰 */
+        .grid-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: -1;
+        }
+        .glass-panel {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        }
+        .nav-btn {
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-muted);
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .nav-btn:hover {
+            color: var(--text-main);
+            background: rgba(255,255,255,0.05);
+        }
+        .nav-btn.active {
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+            border-color: rgba(59, 130, 246, 0.3);
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.1);
+        }
+        /* 滑动条样式优化 */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 18px;
+            width: 18px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: 2px solid #fff;
+            cursor: pointer;
+            margin-top: -7px;
+            box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+        }
+        .bokeh-preview {
+            width: 150px;
+            height: 150px;
+            border: 1px solid var(--border-color);
+            background: #000;
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+        }
+        canvas {
+            cursor: crosshair;
+            display: block;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="grid-bg"></div>
+    
+    <div class="max-w-7xl mx-auto relative z-10">
+        <header class="mb-8 border-b border-slate-700/50 pb-6 flex flex-col md:flex-row justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight text-white mb-1 flex items-center">
+                    <span class="w-2 h-8 bg-blue-600 rounded mr-3 shadow-[0_0_15px_rgba(37,99,235,0.6)]"></span>
+                    镜头物理光学原理
+                </h1>
+                <p class="text-sm text-slate-400 font-mono pl-5">交互式光路追踪实验室 (Interactive Ray Tracing Lab)</p>
+            </div>
+            <div class="mt-4 md:mt-0 text-right">
+                <div class="inline-flex items-center px-3 py-1 rounded-full bg-blue-900/30 border border-blue-500/20 text-xs text-blue-300 font-mono">
+                    <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse mr-2"></span>
+                    物理引擎已就绪
+                </div>
+            </div>
+        </header>
+
+        <!-- 导航标签 -->
+        <nav class="flex flex-wrap gap-2 mb-6 justify-center md:justify-start">
+            <button onclick="switchTab(0)" id="tab-0" class="nav-btn px-4 py-2 text-sm font-medium">1. 光学概念</button>
+            <button onclick="switchTab(1)" id="tab-1" class="nav-btn px-4 py-2 text-sm font-medium">2. 单点成像</button>
+            <button onclick="switchTab(2)" id="tab-2" class="nav-btn px-4 py-2 text-sm font-medium">3. 平面成像</button>
+            <button onclick="switchTab(3)" id="tab-3" class="nav-btn px-4 py-2 text-sm font-medium">4. 对焦原理</button>
+            <button onclick="switchTab(4)" id="tab-4" class="nav-btn px-4 py-2 text-sm font-medium">5. 非中心对焦</button>
+            <button onclick="switchTab(5)" id="tab-5" class="nav-btn px-4 py-2 text-sm font-medium">6. 变焦原理</button>
+            <button onclick="switchTab(6)" id="tab-6" class="nav-btn px-4 py-2 text-sm font-medium">7. 光圈与景深</button>
+            <button onclick="switchTab(7)" id="tab-7" class="nav-btn px-4 py-2 text-sm font-medium">8. 综合实验</button>
+        </nav>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- 左侧：主视口区 -->
+            <div class="lg:col-span-8 space-y-4">
+                <div class="glass-panel p-1">
+                    <div class="relative bg-black rounded-lg overflow-hidden border border-slate-800">
+                        <!-- 画布 -->
+                        <canvas id="opticalCanvas" width="800" height="480" class="w-full h-auto"></canvas>
+                        
+                        <!-- 画布内的小标签 -->
+                        <div class="absolute top-3 left-3 flex gap-2">
+                            <span class="px-2 py-1 bg-black/60 border border-slate-800 text-slate-400 text-[10px] font-mono rounded backdrop-blur-sm" id="modeLabel">
+                                实时光路追踪: ON
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 理论说明区域 -->
+                <div class="glass-panel p-6">
+                    <h2 id="theoryTitle" class="text-lg font-bold mb-3 text-white flex items-center">
+                        <span class="text-blue-500 mr-2">✦</span>
+                        <span id="titleText">加载中...</span>
+                    </h2>
+                    <div id="theoryContent" class="text-slate-300 text-sm leading-relaxed space-y-3 font-light"></div>
+                </div>
+            </div>
+
+            <!-- 右侧：控制台与数据 -->
+            <div class="lg:col-span-4 space-y-6">
+                <!-- 控制器 -->
+                <div class="glass-panel p-5">
+                    <div class="flex justify-between items-center mb-4 border-b border-slate-700/50 pb-2">
+                        <h3 class="text-sm font-bold text-slate-200">参数控制面板</h3>
+                        <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+                    </div>
+                    <div id="controlsContainer" class="space-y-6">
+                        <!-- 动态生成控件 -->
+                    </div>
+                </div>
+
+                <!-- 传感器视图 -->
+                <div class="glass-panel p-5 flex flex-col items-center">
+                    <div class="w-full flex justify-between items-center mb-4 border-b border-slate-700/50 pb-2">
+                        <h3 class="text-sm font-bold text-slate-200">传感器成像预览</h3>
+                        <span class="text-[10px] text-slate-500 font-mono border border-slate-700 px-1 rounded">CMOS VIEW</span>
+                    </div>
+                    
+                    <div id="viewfinder" class="bokeh-preview flex items-center justify-center mb-4">
+                        <!-- 动态生成的Bokeh元素 -->
+                    </div>
+                    
+                    <div class="w-full bg-black/40 p-3 rounded border border-slate-800 text-center">
+                        <p id="bokehStatus" class="text-xs font-mono mb-1"></p>
+                        <p id="opticalStats" class="text-[10px] text-slate-500 font-mono border-t border-slate-800 pt-2 mt-2"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('opticalCanvas');
+        const ctx = canvas.getContext('2d');
+        const viewfinder = document.getElementById('viewfinder');
+        const bokehStatus = document.getElementById('bokehStatus');
+        const opticalStats = document.getElementById('opticalStats');
+        const titleText = document.getElementById('titleText');
+        const modeLabel = document.getElementById('modeLabel');
+        
+        const SENSOR_X = 720; 
+        const OPTICAL_CENTER_Y = 220;
+        const LENS_RADIUS_Y = 140; 
+        
+        // CMOS 尺寸 (43mm半高, 总高86mm)
+        const SENSOR_HALF_HEIGHT = 43; 
+        const SENSOR_TOP = OPTICAL_CENTER_Y - SENSOR_HALF_HEIGHT;
+        const SENSOR_BOTTOM = OPTICAL_CENTER_Y + SENSOR_HALF_HEIGHT;
+        
+        // 预览窗口尺寸
+        const VIEWFINDER_SIZE = 150;
+        // 计算映射比例: 预览像素 / 传感器毫米
+        const SCALE_MM_TO_PX = VIEWFINDER_SIZE / (SENSOR_HALF_HEIGHT * 2);
+
+        let currentTab = 0;
+        let state = {};
+
+        const unit = "mm";
+        
+        const topics = [
+            {
+                title: "光学概念",
+                content: `<p><b>焦点 (Focus, F)：</b>当平行光（如无穷远处的太阳光）穿过凸透镜后，会汇聚到主光轴上的一点，这个点就是焦点。</p>
+                          <p><b>焦距 (Focal Length, f)：</b>从镜头光心到焦点的距离。它是镜头的<b>固有物理属性</b>，由镜片的材质和曲率决定。对于定焦镜头，焦距是固定的；只有通过改变内部镜片组的相对结构（即变焦），才能改变系统的有效焦距。</p>
+                          <p><b>物距 (Object Distance, u)：</b>物体到镜头光心的距离。</p>
+                          <p><b>像距 (Image Distance, v)：</b>清晰成像的平面（如传感器）到镜头光心的距离。对于平行光（无穷远物体），当<b>像距等于焦距</b>时，焦点恰好落在传感器上，即可清晰成像。</p>`,
+                defaultState: { objectDistance: 5000, lensPos: 570, f: 100, aperture: 60, objH: 0, offAxis: 0 }, 
+                controls: [
+                    {id: 'f', label: '调整焦距 f', min: 60, max: 200}
+                ],
+                mode: 'parallel' 
+            },
+            {
+                title: "单点成像原理",
+                content: `<p><b>点光源模型：</b>一切光学的基础。想象左侧是一个发光的“物点”。</p>
+                          <p><b>汇聚作用：</b>凸透镜将发散的光线折射。当物点在特定距离时，光线恰好汇聚在传感器上。</p>
+                          <p><b>弥散圆：</b>尝试移动物点。你会发现当它偏离合焦位置时，光线在传感器上无法汇聚成点，而是形成一个模糊的光斑。</p>`,
+                defaultState: { objectDistance: 300, lensPos: 570, f: 100, aperture: 40, objH: 0, offAxis: 0 },
+                controls: [
+                    {id: 'objectDistance', label: '移动物点 (改变物距)', min: 150, max: 500}
+                ],
+                mode: 'point' 
+            },
+            {
+                title: "平面成像原理",
+                content: `<p><b>物平面模型：</b>现实中物体有高度。我们用一条垂直线代表物体，取上、中、下三个点来追踪光路。</p>
+                          <p><b>固定对焦：</b>镜头的像距 v 被锁死。你会发现只有物体在特定距离（约300mm）时，红蓝白三个点才会在传感器上完美重合。</p>
+                          <p><b>实像倒立：</b>观察光路，红色的顶部光线最终汇聚在传感器底部，证明了相机成像是<b>倒立</b>的。</p>`,
+                defaultState: { objectDistance: 300, lensPos: 570, f: 100, aperture: 40, objH: 60, offAxis: 0 },
+                controls: [{id: 'objectDistance', label: '移动物体前后位置', min: 120, max: 550}],
+                mode: 'plane' 
+            },
+            {
+                title: "对焦原理",
+                content: `<p><b>对焦机制：</b>当物体移动时，像的位置也会移动。为了让像重新回到传感器上，我们需要移动镜头。</p>
+                          <p><b>公式验证：</b>1/u + 1/v = 1/f。物距 u 变小（物体靠近），像距 v 必须变大（镜头前伸）。</p>
+                          <p><b>操作：</b>先改变物距让画面模糊，然后拖动“镜头位置”让画面重新清晰。</p>`,
+                defaultState: { objectDistance: 300, lensPos: 570, f: 100, aperture: 40, objH: 60, offAxis: 0 },
+                controls: [
+                    {id: 'objectDistance', label: '物体距离 (u)', min: 110, max: 550},
+                    {id: 'lensPos', label: '移动镜头对焦 (v)', min: 500, max: 620}
+                ],
+                mode: 'plane'
+            },
+            {
+                title: "非中心对焦",
+                content: `<p><b>轴外成像：</b>并非所有物体都在画面正中心。当物体上下移动时，光线以倾斜角度射入镜头。</p>
+                          <p><b>场曲与像差：</b>在简单单透镜中，斜射光线经过边缘时折射复杂，往往导致中心清晰时边缘模糊（场曲）。</p>
+                          <p class="text-blue-300 border-l-2 border-blue-500 pl-2 mt-2"><b>现代光学修正：</b>为了解决这个问题，现代镜头设计会使用<b>非球面镜片</b>或复杂的复合透镜组来校正场曲和像散，从而“拉平”焦平面，使得画面边缘也能像中心一样清晰锐利。</p>
+                          <p><b>观察：</b>尝试大幅度上下移动物体，观察光路在传感器上的落点变化。</p>`,
+                defaultState: { objectDistance: 300, lensPos: 566, f: 100, aperture: 40, objH: 60, offAxis: 60 },
+                controls: [
+                    {id: 'objectDistance', label: '物体距离', min: 150, max: 500},
+                    {id: 'offAxis', label: '物体垂直高度 (轴外)', min: -90, max: 90},
+                    {id: 'lensPos', label: '对焦微调', min: 500, max: 620}
+                ],
+                mode: 'plane'
+            },
+            {
+                title: "变焦原理",
+                content: `<p><b>改变焦距：</b>变焦就是改变透镜的折射能力 f。焦距越长，折射力越弱，光线汇聚得越远，图像被放得越大。</p>
+                          <p><b>联动调节：</b>变焦后，像平面位置会剧烈变化，必须配合移动镜头位置（或内部的补偿镜组）才能重新合焦。</p>
+                          <p><b>视角变化：</b>长焦时，能拍摄的视野变窄，背景虚化通常更明显。</p>`,
+                defaultState: { objectDistance: 300, lensPos: 550, f: 100, aperture: 40, objH: 60, offAxis: 0 },
+                controls: [
+                    {id: 'objectDistance', label: '物体距离', min: 150, max: 500},
+                    {id: 'f', label: '调整焦距 (Zoom)', min: 60, max: 150},
+                    {id: 'lensPos', label: '补偿组对焦', min: 450, max: 620}
+                ],
+                mode: 'plane'
+            },
+            {
+                title: "光圈与景深",
+                content: `<p><b>景深 (Depth of Field)：</b>光圈越小，光路越窄，弥散圆增长越慢，清晰范围越广。</p>
+                          <p><b>遮挡原理：</b>请观察灰色光线，它们被光圈叶片物理阻挡。这种“束束光”的效果使得只有近轴光线能通过。</p>
+                          <p><b>操作：</b>对比大光圈（数值小）和小光圈（数值大）下，红蓝两点的模糊程度差异。</p>`,
+                defaultState: { objectDistance: 350, lensPos: 560, f: 100, aperture: 80, objH: 50, offAxis: 0 },
+                controls: [
+                    {id: 'aperture', label: '光圈大小 (影响景深)', min: 10, max: 90},
+                    {id: 'lensPos', label: '移动对焦平面', min: 480, max: 650}
+                ],
+                mode: 'aperture-demo'
+            },
+            {
+                title: "综合实验",
+                content: `<p><b>自由探索：</b>这是一个全功能的实验室。您可以同时控制变焦、对焦、光圈以及三个独立平面的位置。</p>
+                          <p><b>操作建议：</b><br>
+                          1. 改变<b>焦距 f</b> 观察视角和背景压缩感。<br>
+                          2. 移动<b>红/绿/蓝平面</b> 制造不同距离的对焦目标。<br>
+                          3. 调整<b>光圈</b> 寻找让两者都清晰（超焦距）的平衡点。</p>`,
+                // 综合模式下 objH 设置小一点 (1/5)
+                defaultState: { 
+                    objectDistance: 300, lensPos: 570, f: 100, aperture: 50, objH: 12, 
+                    dist1: 250, dist2: 400, dist3: 500, 
+                    off1: -30, off2: 0, off3: 30 // 初始上下错开
+                },
+                controls: [
+                    {id: 'f', label: '变焦 (焦距 f)', min: 60, max: 150},
+                    {id: 'lensPos', label: '对焦 (像距 v)', min: 450, max: 650},
+                    {id: 'aperture', label: '光圈大小', min: 10, max: 90},
+                    [
+                        {id: 'dist1', label: '红色平面距离', min: 150, max: 500},
+                        {id: 'off1', label: '红偏移', min: -60, max: 60}
+                    ],
+                    [
+                        {id: 'dist2', label: '绿色平面距离', min: 150, max: 500},
+                        {id: 'off2', label: '绿偏移', min: -60, max: 60}
+                    ],
+                    [
+                        {id: 'dist3', label: '蓝色平面距离', min: 150, max: 500},
+                        {id: 'off3', label: '蓝偏移', min: -60, max: 60}
+                    ]
+                ],
+                mode: 'comprehensive'
+            }
+        ];
+
+        function switchTab(index) {
+            currentTab = index;
+            state = { ...topics[index].defaultState };
+            
+            document.querySelectorAll('nav button').forEach((btn, i) => {
+                if (i === index) {
+                    btn.classList.add('active');
+                    btn.classList.remove('text-slate-400');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            
+            titleText.innerText = topics[index].title;
+            document.getElementById('theoryContent').innerHTML = topics[index].content;
+            if(modeLabel) modeLabel.innerText = topics[index].mode === 'comprehensive' ? "COMPREHENSIVE LAB" : topics[index].mode.toUpperCase().replace('-', ' ');
+            
+            const container = document.getElementById('controlsContainer');
+            container.innerHTML = '';
+            topics[index].controls.forEach(ctrl => {
+                if (Array.isArray(ctrl)) {
+                    // 处理成排的控件 (Tab 8 专用)
+                    const rowDiv = document.createElement('div');
+                    rowDiv.className = "flex gap-2 mb-4";
+                    ctrl.forEach(subCtrl => {
+                        const div = document.createElement('div');
+                        div.className = "flex-1";
+                        div.innerHTML = `
+                            <div class="flex justify-between mb-1">
+                                <label class="text-[10px] font-semibold text-slate-400 font-mono tracking-wider">${subCtrl.label}</label>
+                                <span class="text-[10px] text-blue-400 font-mono" id="val-${subCtrl.id}">${state[subCtrl.id]}</span>
+                            </div>
+                            <input type="range" min="${subCtrl.min}" max="${subCtrl.max}" value="${state[subCtrl.id]}" 
+                                class="w-full h-1"
+                                oninput="updateState('${subCtrl.id}', this.value)">
+                        `;
+                        rowDiv.appendChild(div);
+                    });
+                    container.appendChild(rowDiv);
+                } else {
+                    const div = document.createElement('div');
+                    div.className = "mb-4";
+                    div.innerHTML = `
+                        <div class="flex justify-between mb-2">
+                            <label class="text-xs font-semibold text-slate-400 font-mono tracking-wider">${ctrl.label}</label>
+                            <span class="text-xs text-blue-400 font-mono" id="val-${ctrl.id}">${state[ctrl.id]}<span class="text-[10px] text-slate-500 ml-1">${unit}</span></span>
+                        </div>
+                        <input type="range" min="${ctrl.min}" max="${ctrl.max}" value="${state[ctrl.id]}" 
+                            class="w-full"
+                            oninput="updateState('${ctrl.id}', this.value)">
+                    `;
+                    container.appendChild(div);
+                }
+            });
+            
+            render();
+        }
+
+        function updateState(key, val) {
+            state[key] = parseFloat(val);
+            const displayVal = document.getElementById(`val-${key}`);
+            if(displayVal) {
+                if(displayVal.innerHTML.includes('span'))
+                    displayVal.innerHTML = `${val}<span class="text-[10px] text-slate-500 ml-1">${unit}</span>`;
+                else 
+                    displayVal.innerText = val;
+            }
+            render();
+        }
+
+        function drawLens(x, height, thickness) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.ellipse(x, OPTICAL_CENTER_Y, thickness, height, 0, 0, Math.PI * 2);
+            
+            let gradient = ctx.createRadialGradient(x-thickness/2, OPTICAL_CENTER_Y-20, 0, x, OPTICAL_CENTER_Y, height);
+            gradient.addColorStop(0, 'rgba(180, 220, 255, 0.2)');
+            gradient.addColorStop(1, 'rgba(59, 130, 246, 0.1)');
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            
+            ctx.strokeStyle = '#60a5fa'; // 亮蓝色边框
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            
+            // 移除了玻璃反光曲线
+            
+            // 中轴线标记
+            ctx.beginPath();
+            ctx.moveTo(x, OPTICAL_CENTER_Y - height + 10);
+            ctx.lineTo(x, OPTICAL_CENTER_Y + height - 10);
+            ctx.strokeStyle = 'rgba(100, 180, 255, 0.6)'; // 提高亮度
+            ctx.setLineDash([4, 4]);
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
+            ctx.restore();
+            
+            // 镜头支架
+            ctx.strokeStyle = '#475569';
+            ctx.setLineDash([]);
+            ctx.lineWidth = 1;
+            ctx.strokeRect(x-thickness-5, OPTICAL_CENTER_Y-height-15, (thickness+5)*2, height*2+30);
+            
+            // 镜头上方标签 (中文)
+            ctx.fillStyle = "#94a3b8";
+            ctx.font = "12px sans-serif";
+            ctx.fillText("镜头组", x - 18, OPTICAL_CENTER_Y - height - 25);
+        }
+
+        function drawDistanceLabels(objX, lensX, sensorX, isParallel, isComprehensive) {
+            const labelY = OPTICAL_CENTER_Y + 190; 
+            
+            ctx.save();
+            ctx.fillStyle = '#64748b';
+            ctx.strokeStyle = '#475569';
+            ctx.font = '12px sans-serif';
+            ctx.lineWidth = 1;
+
+            if (isComprehensive) {
+                // 综合模式下，物距在物体下方单独标，这里只标像距
+            } else if (!isParallel) {
+                // 绘制物距 u
+                ctx.beginPath();
+                ctx.moveTo(objX, labelY);
+                ctx.lineTo(lensX, labelY);
+                ctx.moveTo(objX, labelY - 4); ctx.lineTo(objX, labelY + 4);
+                ctx.moveTo(lensX, labelY - 4); ctx.lineTo(lensX, labelY + 4);
+                ctx.stroke();
+                
+                const uText = `物距 u = ${Math.round(lensX - objX)}mm`;
+                const uWidth = ctx.measureText(uText).width;
+                ctx.fillStyle = '#000';
+                ctx.fillRect(objX + (lensX - objX)/2 - uWidth/2 - 4, labelY - 12, uWidth + 8, 16);
+                ctx.fillStyle = '#94a3b8';
+                ctx.fillText(uText, objX + (lensX - objX)/2 - uWidth/2, labelY + 4);
+            } else {
+                // 平行光模式：画一个向左的箭头表示无穷远
+                const arrowEndX = lensX - 300; 
+                ctx.beginPath();
+                ctx.moveTo(lensX, labelY);
+                ctx.lineTo(arrowEndX, labelY);
+                ctx.moveTo(arrowEndX, labelY);
+                ctx.lineTo(arrowEndX + 10, labelY - 4);
+                ctx.moveTo(arrowEndX, labelY);
+                ctx.lineTo(arrowEndX + 10, labelY + 4);
+                
+                ctx.moveTo(lensX, labelY - 4); ctx.lineTo(lensX, labelY + 4);
+                ctx.stroke();
+
+                const uText = `物距 u = ∞`;
+                const uWidth = ctx.measureText(uText).width;
+                ctx.fillStyle = '#000';
+                ctx.fillRect(lensX - 150 - uWidth/2 - 4, labelY - 12, uWidth + 8, 16);
+                ctx.fillStyle = '#94a3b8';
+                ctx.fillText(uText, lensX - 150 - uWidth/2, labelY + 4);
+            }
+
+            // 绘制像距 v (Lens -> Sensor)
+            const vVal = Math.round(sensorX - lensX);
+            const vText = `像距 v = ${vVal}mm`;
+            
+            ctx.beginPath();
+            ctx.moveTo(lensX, labelY);
+            ctx.lineTo(sensorX, labelY);
+            ctx.moveTo(sensorX, labelY - 4); ctx.lineTo(sensorX, labelY + 4);
+            ctx.stroke();
+            
+            const vWidth = ctx.measureText(vText).width;
+            ctx.fillStyle = '#000';
+            ctx.fillRect(lensX + (sensorX - lensX)/2 - vWidth/2 - 4, labelY - 12, vWidth + 8, 16);
+            ctx.fillStyle = '#94a3b8';
+            ctx.fillText(vText, lensX + (sensorX - lensX)/2 - vWidth/2, labelY + 4);
+
+            // 如果是平行光模式，额外绘制焦距 f (Lens -> Focus)
+            if(isParallel) {
+                const focusX = lensX + state.f;
+                const fLabelY = labelY - 25; 
+                ctx.strokeStyle = '#60a5fa'; // 亮蓝色区分
+                ctx.beginPath();
+                ctx.moveTo(lensX, fLabelY);
+                ctx.lineTo(focusX, fLabelY);
+                ctx.moveTo(lensX, fLabelY - 4); ctx.lineTo(lensX, fLabelY + 4);
+                ctx.moveTo(focusX, fLabelY - 4); ctx.lineTo(focusX, fLabelY + 4);
+                ctx.stroke();
+
+                const fLabel = `焦距 f = ${state.f}mm`;
+                const fWidth = ctx.measureText(fLabel).width;
+                ctx.fillStyle = '#000';
+                ctx.fillRect(lensX + (focusX - lensX)/2 - fWidth/2 - 4, fLabelY - 12, fWidth + 8, 16);
+                ctx.fillStyle = '#60a5fa';
+                ctx.fillText(fLabel, lensX + (focusX - lensX)/2 - fWidth/2, fLabelY + 4);
+            }
+
+            ctx.restore();
+        }
+
+        function render() {
+            // 清空画布
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const mode = topics[currentTab].mode;
+            const f = state.f;
+            
+            // 1. 光轴 (增强可见度)
+            ctx.setLineDash([8, 8]);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)'; // 提高亮度
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(0, OPTICAL_CENTER_Y); ctx.lineTo(canvas.width, OPTICAL_CENTER_Y); ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // 传感器 (CMOS)
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(SENSOR_X, SENSOR_TOP, 16, SENSOR_HALF_HEIGHT * 2);
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(SENSOR_X, SENSOR_TOP, 16, SENSOR_HALF_HEIGHT * 2);
+            // 感光面高亮
+            ctx.beginPath(); 
+            ctx.moveTo(SENSOR_X, SENSOR_TOP); 
+            ctx.lineTo(SENSOR_X, SENSOR_BOTTOM); 
+            ctx.strokeStyle = '#10b981'; // 翠绿色
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            
+            // CMOS 标签 (中文)
+            ctx.fillStyle = "#94a3b8";
+            ctx.font = "12px sans-serif";
+            ctx.fillText("传感器(CMOS)", SENSOR_X - 35, SENSOR_TOP - 10);
+            
+            // 镜头
+            drawLens(state.lensPos, LENS_RADIUS_Y, f/6);
+            
+            // 光圈
+            ctx.strokeStyle = '#f59e0b';
+            ctx.lineWidth = 3;
+            const gap = state.aperture; // 光圈半径
+            const lensTopY = OPTICAL_CENTER_Y - LENS_RADIUS_Y;
+            const lensBottomY = OPTICAL_CENTER_Y + LENS_RADIUS_Y;
+            
+            ctx.beginPath(); ctx.moveTo(state.lensPos, lensTopY); ctx.lineTo(state.lensPos, OPTICAL_CENTER_Y - gap); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(state.lensPos, lensBottomY); ctx.lineTo(state.lensPos, OPTICAL_CENTER_Y + gap); ctx.stroke();
+
+            // 2. 准备渲染对象
+            let renderObjects = [];
+            let mainObjU = state.objectDistance;
+
+            if (mode === 'parallel') {
+                 // 平行光模式：不画物体
+            } else if (mode === 'point') {
+                renderObjects.push({ 
+                    u: state.objectDistance, 
+                    points: [{ y: 0, color: '#ffffff', label: '点光源' }],
+                    isPoint: true
+                });
+            } else if (mode === 'plane') {
+                renderObjects.push({ 
+                    u: state.objectDistance, 
+                    points: [
+                        { y: -state.objH + state.offAxis, color: '#ef4444', label: '顶' },
+                        { y: 0 + state.offAxis, color: '#ffffff', label: '中' },
+                        { y: state.objH + state.offAxis, color: '#3b82f6', label: '底' }
+                    ],
+                    drawBody: true,
+                    label: "物平面"
+                });
+            } else if (mode === 'aperture-demo') {
+                renderObjects.push({ u: state.objectDistance - 100, points: [{ y: -state.objH, color: '#ef4444' }], label: "近处" });
+                renderObjects.push({ u: state.objectDistance, points: [{ y: 0, color: '#ffffff' }], label: "中间" });
+                renderObjects.push({ u: state.objectDistance + 150, points: [{ y: state.objH, color: '#3b82f6' }], label: "远处" });
+                mainObjU = state.objectDistance; 
+            } else if (mode === 'comprehensive') {
+                // 综合实验：三个独立平面 (红绿蓝)
+                renderObjects.push({ 
+                    u: state.dist1, 
+                    points: [{ y: -state.objH + state.off1, color: '#ef4444' }, { y: state.objH + state.off1, color: '#ef4444' }], 
+                    label: "红平面", drawBody: true
+                });
+                renderObjects.push({ 
+                    u: state.dist2, 
+                    points: [{ y: -state.objH + state.off2, color: '#22c55e' }, { y: state.objH + state.off2, color: '#22c55e' }], 
+                    label: "绿平面", drawBody: true
+                });
+                renderObjects.push({ 
+                    u: state.dist3, 
+                    points: [{ y: -state.objH + state.off3, color: '#3b82f6' }, { y: state.objH + state.off3, color: '#3b82f6' }], 
+                    label: "蓝平面", drawBody: true
+                });
+            }
+
+            // 绘制标注线
+            drawDistanceLabels(state.lensPos - mainObjU, state.lensPos, SENSOR_X, mode === 'parallel', mode === 'comprehensive');
+
+            // 3. 循环渲染光路
+            if (mode === 'parallel') {
+                // 单独处理平行光
+                const rays = 15; // 增加光线密度
+                const spread = 80; // 光束最大散开宽度
+                const focusX = state.lensPos + f;
+                
+                // 绘制焦点
+                ctx.fillStyle = "#fff";
+                ctx.beginPath(); ctx.arc(focusX, OPTICAL_CENTER_Y, 3, 0, Math.PI*2); ctx.fill();
+                ctx.fillText("F", focusX - 5, OPTICAL_CENTER_Y + 20);
+
+                for(let i=0; i<rays; i++) {
+                    const y = OPTICAL_CENTER_Y + (i - (rays-1)/2) * (spread*2 / (rays-1));
+                    
+                    // 检查光圈遮挡
+                    const isBlocked = Math.abs(y - OPTICAL_CENTER_Y) > gap;
+
+                    if (isBlocked) {
+                        // 被遮挡的光线 - 虚线暗灰色 (增强可见度)
+                        ctx.setLineDash([3, 5]);
+                        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)'; // 调亮
+                        ctx.lineWidth = 1.0; 
+                        ctx.beginPath();
+                        ctx.moveTo(0, y);
+                        ctx.lineTo(state.lensPos, y);
+                        ctx.stroke();
+                        ctx.setLineDash([]); // 重置
+                    } else {
+                        // 正常光线 - 白色
+                        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)'; 
+                        ctx.lineWidth = 1.0; 
+                        
+                        // 1. 入射
+                        ctx.beginPath();
+                        ctx.moveTo(0, y);
+                        ctx.lineTo(state.lensPos, y);
+                        ctx.stroke();
+
+                        // 2. 出射 (经过焦点)
+                        ctx.beginPath();
+                        ctx.moveTo(state.lensPos, y);
+                        // 延长到传感器甚至更远
+                        const slope = (OPTICAL_CENTER_Y - y) / f;
+                        const endX = SENSOR_X + 50; 
+                        const endY = y + slope * (endX - state.lensPos);
+                        
+                        ctx.lineTo(endX, endY);
+                        ctx.stroke();
+                    }
+                }
+
+                // 更新预览
+                const defocus = Math.abs(SENSOR_X - focusX);
+                updateViewfinderParallel(defocus);
+
+            } else {
+                // 正常成像模式
+                let allBlurData = [];
+                renderObjects.forEach((obj, objIdx) => {
+                    const objX = state.lensPos - obj.u;
+                    
+                    // 物体本体
+                    if(obj.drawBody) {
+                        ctx.strokeStyle = obj.points[0].color === '#ffffff' ? '#64748b' : obj.points[0].color;
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.moveTo(objX, OPTICAL_CENTER_Y + obj.points[0].y);
+                        ctx.lineTo(objX, OPTICAL_CENTER_Y + obj.points[obj.points.length-1].y);
+                        ctx.stroke();
+                    }
+
+                    if (obj.label) {
+                        // 综合模式下，标签在物体上方，但要保证不被遮挡
+                        // 距离在物体下方
+                        
+                        let labelY;
+                        
+                        if (mode === 'comprehensive') {
+                            // 1. Draw Name above top point
+                            ctx.fillStyle = obj.points[0].color;
+                            ctx.font = "12px sans-serif";
+                            // Get top Y relative to center
+                            const topYrel = obj.points[0].y; 
+                            const topYabs = OPTICAL_CENTER_Y + topYrel;
+                            
+                            // Background for label
+                            const labelWidth = ctx.measureText(obj.label).width;
+                            ctx.fillStyle = 'rgba(0,0,0,0.7)';
+                            ctx.fillRect(objX - 20 - 4, topYabs - 25, labelWidth + 8, 16);
+                            
+                            ctx.fillStyle = obj.points[0].color;
+                            ctx.fillText(obj.label, objX - 20, topYabs - 13);
+                            
+                            // 2. Draw Distance below bottom point
+                            const botYrel = obj.points[1].y;
+                            const botYabs = OPTICAL_CENTER_Y + botYrel;
+                            const distText = `${Math.round(obj.u)}mm`;
+                            
+                            // Background for distance
+                            const distWidth = ctx.measureText(distText).width;
+                            ctx.fillStyle = 'rgba(0,0,0,0.7)';
+                            ctx.fillRect(objX - 15 - 4, botYabs + 8, distWidth + 8, 16);
+                            
+                            ctx.fillStyle = "#94a3b8";
+                            ctx.fillText(distText, objX - 15, botYabs + 20);
+                            
+                        } else {
+                            ctx.fillStyle = obj.points[0].color === '#ffffff' ? '#94a3b8' : obj.points[0].color;
+                            ctx.font = "12px sans-serif";
+                            
+                            if(mode === 'aperture-demo') labelY = OPTICAL_CENTER_Y + obj.points[0].y - 10;
+                            else if(obj.isPoint) labelY = OPTICAL_CENTER_Y - 20; 
+                            else labelY = OPTICAL_CENTER_Y - 15;
+
+                            ctx.fillText(obj.label, objX - 20, labelY);
+                        }
+                    }
+
+                    obj.points.forEach(pt => {
+                        const startY = OPTICAL_CENTER_Y + pt.y;
+                        ctx.fillStyle = pt.color;
+                        ctx.beginPath(); ctx.arc(objX, startY, 3, 0, Math.PI*2); ctx.fill();
+
+                        const v_ideal = (f * obj.u) / (obj.u - f);
+                        let rays, maxSpread;
+                        
+                        // 综合实验模式下光线稍微稀疏一点
+                        if (mode === 'aperture-demo' || mode === 'comprehensive') {
+                            rays = 11;
+                            maxSpread = 90;
+                        } else {
+                            rays = 7;
+                            maxSpread = gap; 
+                        }
+
+                        let sensorIntersects = [];
+                        ctx.lineWidth = 1.0; 
+
+                        for(let i=0; i<rays; i++) {
+                            const lensEntryY = OPTICAL_CENTER_Y + (i - (rays-1)/2) * (maxSpread * 2 / (rays-1));
+                            const isBlocked = Math.abs(lensEntryY - OPTICAL_CENTER_Y) > gap;
+
+                            if (isBlocked && (mode === 'aperture-demo' || mode === 'comprehensive')) {
+                                // 挡住的光线
+                                ctx.setLineDash([3, 5]);
+                                ctx.strokeStyle = pt.color + '44'; 
+                                ctx.lineWidth = 1.0;
+                                ctx.beginPath();
+                                ctx.moveTo(objX, startY);
+                                ctx.lineTo(state.lensPos, lensEntryY);
+                                ctx.stroke();
+                                ctx.setLineDash([]);
+                            } else if (!isBlocked) {
+                                // 有效光线
+                                ctx.strokeStyle = pt.color + '99'; 
+                                ctx.lineWidth = 1.0;
+                                ctx.beginPath();
+                                ctx.moveTo(objX, startY);
+                                ctx.lineTo(state.lensPos, lensEntryY);
+                                ctx.stroke();
+
+                                const imgX = state.lensPos + v_ideal;
+                                const imgY = OPTICAL_CENTER_Y - (pt.y * (v_ideal / obj.u)); 
+                                const slope = (imgY - lensEntryY) / (imgX - state.lensPos);
+                                
+                                const endX = SENSOR_X + 20;
+                                const endY = lensEntryY + slope * (endX - state.lensPos);
+
+                                ctx.beginPath();
+                                ctx.moveTo(state.lensPos, lensEntryY);
+                                ctx.lineTo(endX, endY);
+                                ctx.stroke();
+
+                                const intersectY = lensEntryY + slope * (SENSOR_X - state.lensPos);
+                                sensorIntersects.push(intersectY);
+                            }
+                        }
+
+                        if (sensorIntersects.length > 0) {
+                            const minY = Math.min(...sensorIntersects);
+                            const maxY = Math.max(...sensorIntersects);
+                            allBlurData.push({
+                                color: pt.color,
+                                size: Math.abs(maxY - minY), // 物理弥散圆直径 (mm)
+                                centerY: (minY + maxY) / 2 - OPTICAL_CENTER_Y,
+                                u: obj.u
+                            });
+                        }
+                    });
+                });
+
+                updateViewfinder(allBlurData, mode);
+            }
+            
+            // 更新底部统计
+            const v_current = SENSOR_X - state.lensPos;
+            if (mode === 'parallel') {
+                opticalStats.innerText = `物距 u = ∞ (平行光) | 像距 v = ${Math.round(v_current)}mm | 焦距 f = ${state.f}mm`;
+            } else if (currentTab === 1) { // 单点成像
+                 opticalStats.innerText = `物距=${Math.round(state.objectDistance)}mm | 焦距=${state.f}mm (固定)`;
+            } else if (mode === 'comprehensive') {
+                 opticalStats.innerText = `像距 v=${Math.round(v_current)}mm | 焦距 f=${state.f}mm`;
+            } else {
+                 opticalStats.innerText = `像距=${Math.round(v_current)}mm | 焦距=${state.f}mm`;
+            }
+        }
+
+        function updateViewfinderParallel(defocus) {
+            viewfinder.innerHTML = '';
+            const el = document.createElement('div');
+            el.className = 'absolute rounded-full bg-white shadow-[0_0_10px_white]';
+            
+            // 基于相似三角形计算物理弥散圆直径: D = Aperture * (defocus / f)
+            // Aperture here is radius, so diameter is 2 * state.aperture
+            const physicalDiameter = (state.aperture * 2) * (defocus / state.f);
+            
+            // 映射到预览窗口像素: size_px = physical_mm * SCALE
+            const size = Math.max(4, physicalDiameter * SCALE_MM_TO_PX);
+            
+            const opacity = Math.max(0.1, 1 - size/200);
+            const blur = size / 6;
+
+            el.style.width = `${size}px`;
+            el.style.height = `${size}px`;
+            el.style.opacity = opacity;
+            el.style.filter = `blur(${blur}px)`;
+            el.style.top = '50%';
+            el.style.left = '50%';
+            el.style.transform = 'translate(-50%, -50%)';
+            viewfinder.appendChild(el);
+
+            if(defocus < 5) {
+                bokehStatus.innerText = "状态：焦点汇聚";
+                bokehStatus.className = "text-xs font-mono font-bold text-emerald-400";
+            } else {
+                bokehStatus.innerText = `离焦模糊 (弥散圆: ${Math.round(physicalDiameter)}mm)`;
+                bokehStatus.className = "text-xs font-mono text-slate-400";
+            }
+        }
+
+        function updateViewfinder(data, mode) {
+            viewfinder.innerHTML = ''; 
+            
+            if (mode === 'comprehensive') {
+                // 综合实验模式：绘制线段
+                // data 包含 {color, size, centerY, u}
+                // 我们假设每两个点构成一个平面 (Top/Bottom)
+                // data[0] Top, data[1] Bottom -> Plane 1 (Red)
+                // data[2] Top, data[3] Bottom -> Plane 2 (Green)
+                // data[4] Top, data[5] Bottom -> Plane 3 (Blue)
+                
+                for(let i=0; i<data.length; i+=2) {
+                    if (i+1 >= data.length) break;
+                    
+                    const topPt = data[i]; // Top point in canvas coords (actually inverted on sensor)
+                    const botPt = data[i+1];
+                    
+                    // 物理位置转换到像素
+                    const topY = topPt.centerY * SCALE_MM_TO_PX;
+                    const botY = botPt.centerY * SCALE_MM_TO_PX;
+                    
+                    // 模糊宽度 (取平均)
+                    const blurSize = (topPt.size + botPt.size) / 2 * SCALE_MM_TO_PX;
+                    const width = Math.max(2, blurSize);
+                    
+                    const el = document.createElement('div');
+                    el.className = 'absolute';
+                    el.style.backgroundColor = topPt.color;
+                    
+                    // 线段高度
+                    const height = Math.abs(botY - topY);
+                    const centerY = (topY + botY) / 2;
+                    
+                    el.style.width = `${width}px`;
+                    el.style.height = `${height}px`;
+                    el.style.top = `calc(50% + ${centerY}px)`;
+                    el.style.left = '50%';
+                    el.style.transform = 'translate(-50%, -50%)';
+                    
+                    // 模糊处理
+                    const blurAmount = width / 6;
+                    el.style.filter = `blur(${blurAmount}px)`;
+                    el.style.opacity = Math.max(0.3, 1 - width/200);
+                    
+                    // 混合模式
+                    el.style.mixBlendMode = 'screen';
+                    viewfinder.appendChild(el);
+                }
+                
+                // 状态显示
+                let statusText = "状态: 全模糊";
+                let statusColor = "text-slate-500";
+                
+                // 找出最小模糊
+                let minBlur = Infinity;
+                let sharpestColor = "";
+                
+                for(let i=0; i<data.length; i++) {
+                    if(data[i].size < minBlur) {
+                        minBlur = data[i].size;
+                        sharpestColor = data[i].color;
+                    }
+                }
+                
+                if (minBlur < 5) {
+                    if(sharpestColor === '#ef4444') { statusText = "合焦: 红平面"; statusColor = "text-red-400"; }
+                    else if(sharpestColor === '#22c55e') { statusText = "合焦: 绿平面"; statusColor = "text-green-400"; }
+                    else if(sharpestColor === '#3b82f6') { statusText = "合焦: 蓝平面"; statusColor = "text-blue-400"; }
+                }
+                
+                bokehStatus.innerText = statusText;
+                bokehStatus.className = `text-xs font-mono font-bold ${statusColor}`;
+                
+            } else {
+                // 普通模式：绘制光斑圆
+                data.forEach((d, i) => {
+                    const el = document.createElement('div');
+                    el.className = 'absolute rounded-full border border-white/30';
+                    el.style.backgroundColor = d.color;
+                    
+                    const size = Math.max(2, d.size * SCALE_MM_TO_PX);
+                    const opacity = Math.max(0.1, 0.8 - (size / 200));
+                    const blur = size / 8; 
+
+                    el.style.width = `${size}px`;
+                    el.style.height = `${size}px`;
+                    el.style.opacity = opacity;
+                    el.style.filter = `blur(${blur}px)`;
+                    el.style.top = `calc(50% + ${d.centerY * SCALE_MM_TO_PX}px)`;
+                    el.style.left = '50%';
+                    el.style.transform = 'translate(-50%, -50%)';
+
+                    viewfinder.appendChild(el);
+                });
+
+                const avgBlurPhysical = data.length > 0 ? data.reduce((acc, d) => acc + d.size, 0) / data.length : 0;
+                
+                if (mode === 'aperture-demo') {
+                    const sharpest = data.reduce((prev, curr) => prev.size < curr.size ? prev : curr, {size: Infinity});
+                    let statusText = "模糊";
+                    let statusColor = "text-slate-500";
+
+                    if (sharpest.size < 5) {
+                        if (sharpest.color === '#ef4444') { statusText = "合焦：近处 (红色)"; statusColor = "text-red-400"; }
+                        else if (sharpest.color === '#ffffff') { statusText = "合焦：中间 (白色)"; statusColor = "text-white"; }
+                        else { statusText = "合焦：远处 (蓝色)"; statusColor = "text-blue-400"; }
+                    }
+                    bokehStatus.innerText = statusText;
+                    bokehStatus.className = `text-xs font-mono font-bold ${statusColor}`;
+                } else {
+                    if(avgBlurPhysical < 4) {
+                        bokehStatus.innerText = "状态：清晰合焦";
+                        bokehStatus.className = "text-xs font-mono font-bold text-emerald-400";
+                    } else {
+                        bokehStatus.innerText = `弥散圆直径: ${Math.round(avgBlurPhysical)}mm`;
+                        bokehStatus.className = "text-xs font-mono text-slate-400";
+                    }
+                }
+            }
+        }
+
+        window.onload = () => switchTab(0);
+    </script>
+</body>
+</html>
