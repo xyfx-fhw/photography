@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>摄影曝光三要素 - 交互式可视化实验室</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --bg-body: #000000;
+            --bg-panel: rgba(20, 20, 20, 0.7);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --accent: #3b82f6; /* Default Blue */
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-image: radial-gradient(circle at 50% 0%, #111111 0%, #000000 100%);
+            min-height: 100vh;
+        }
+
+        /* 细微的网格装饰 */
+        .grid-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .glass-panel {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        /* 定义不同模块的强调色变量，供滑块使用 */
+        .theme-blue { --accent: #3b82f6; }
+        .theme-orange { --accent: #f97316; }
+        .theme-red { --accent: #ef4444; }
+        .theme-green { --accent: #10b981; }
+
+        /* 滑动条样式优化 */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+            width: 100%;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 18px;
+            width: 18px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: 2px solid #fff;
+            cursor: pointer;
+            margin-top: -7px;
+            box-shadow: 0 0 8px var(--accent);
+            transition: transform 0.1s;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+        }
+
+        /* 视觉演示区通用容器 */
+        .visual-box {
+            background: #000;
+            border-radius: 8px;
+            height: 260px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid #333;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+        }
+
+        /* 动画元素特定样式 */
+        #aperture-svg { width: 180px; height: 180px; }
+        /* 增加 lens-ring 的可见度，作为镜头边框 */
+        .lens-ring { fill: #111; stroke: #555; stroke-width: 4; } 
+        .glass-reflection { fill: url(#grad1); opacity: 0.4; pointer-events: none; }
+
+        .shutter-scene { width: 100%; height: 100%; position: relative; background: #0a0a0a; overflow: hidden; }
+        .road { position: absolute; bottom: 40px; width: 100%; height: 2px; background: #333; }
+        .car-wrapper { position: absolute; bottom: 42px; left: -100px; width: 100px; height: 50px; transform: translate3d(0,0,0); }
+        .car-body { width: 100%; height: 35px; background: #f97316; border-radius: 8px 20px 0 0; box-shadow: inset -5px 0 10px rgba(0,0,0,0.2); }
+        .car-wheel { width: 18px; height: 18px; background: #bbb; border-radius: 50%; border: 2px solid #333; position: absolute; bottom: -8px; animation: spin 0.5s linear infinite; }
+        .w1 { left: 15px; } .w2 { right: 15px; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        canvas#iso-scope { width: 100%; height: 100%; }
+
+        .sim-preview {
+            width: 100%; height: 320px;
+            background: #000;
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            /* 更换为细节更丰富的高清风景图，便于观察锐度 */
+            background-image: url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=85');
+            background-size: cover;
+            background-position: center;
+            transition: filter 0.2s ease-out; /* 加快响应速度 */
+            box-shadow: inset 0 0 30px #000;
+        }
+        .noise-layer {
+            position: absolute; inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
+            opacity: 0; pointer-events: none; mix-blend-mode: overlay;
+        }
+        
+        .meter-fill { transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s; }
+        .sharpness-fill { transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="grid-bg"></div>
+
+    <div class="max-w-5xl mx-auto relative z-10">
+        
+        <!-- 头部 Header -->
+        <header class="mb-10 border-b border-slate-800/60 pb-6 flex flex-col md:flex-row justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight text-white mb-1 flex items-center">
+                    <span class="w-2 h-8 bg-blue-600 rounded mr-3 shadow-[0_0_15px_rgba(37,99,235,0.6)]"></span>
+                    摄影曝光三要素
+                </h1>
+                <p class="text-sm text-slate-400 font-mono pl-5 tracking-wide">可视化交互教学实验室 (Interactive Exposure Lab)</p>
+            </div>
+            <div class="mt-4 md:mt-0 text-right">
+                <div class="inline-flex items-center px-3 py-1 rounded-full bg-blue-900/20 border border-blue-500/20 text-xs text-blue-300 font-mono">
+                    <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse mr-2"></span>
+                    物理引擎已就绪
+                </div>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 gap-8">
+            
+            <!-- 1. 光圈模块 -->
+            <div class="glass-panel p-6 theme-blue">
+                <div class="flex items-center mb-6 border-l-4 border-blue-500 pl-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-white">1. 光圈 (Aperture)</h2>
+                        <p class="text-xs text-slate-500 font-mono mt-1">控制进光孔径 & 景深</p>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div class="space-y-6">
+                        <p class="text-slate-300 text-sm leading-relaxed">
+                            光圈就像眼睛的瞳孔。数值越小（如 f/1.8），孔径越大。
+                        </p>
+                        
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <label class="text-xs font-bold text-slate-400 font-mono tracking-wider">F-STOP (光圈值)</label>
+                                <span id="f-display" class="text-sm text-blue-400 font-mono font-bold">f/2.8</span>
+                            </div>
+                            <input type="range" id="f-slider" min="0" max="5" step="1" value="1">
+                        </div>
+
+                        <div class="bg-blue-900/20 border-l-2 border-blue-500 p-3 rounded-r">
+                            <p class="text-xs text-slate-400">
+                                <strong class="text-blue-400 block mb-1">副作用：景深 (Depth of Field)</strong>
+                                光圈开大 (f/1.8) → 背景虚化（适合人像）<br>
+                                光圈缩小 (f/8-f/16) → 前后清晰（适合风景）
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="visual-box">
+                        <svg id="aperture-svg" viewBox="0 0 200 200">
+                            <defs>
+                                <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#fff;stop-opacity:0.4" />
+                                    <stop offset="100%" style="stop-color:#fff;stop-opacity:0" />
+                                </linearGradient>
+                            </defs>
+                            <!-- 镜头外框 (确保看起来是圆的) -->
+                            <circle cx="100" cy="100" r="98" stroke="#333" stroke-width="2" fill="#050505" />
+                            <circle cx="100" cy="100" r="90" class="lens-ring" />
+                            
+                            <!-- 光圈叶片路径，改为亮灰色(#444)以便看清，增加描边 -->
+                            <path id="blades-path" d="" fill="#444" stroke="#222" stroke-width="1" />
+                            
+                            <!-- 玻璃反光 -->
+                            <circle cx="100" cy="100" r="90" class="glass-reflection" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. 快门模块 -->
+            <div class="glass-panel p-6 theme-orange">
+                <div class="flex items-center mb-6 border-l-4 border-orange-500 pl-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-white">2. 快门 (Shutter Speed)</h2>
+                        <p class="text-xs text-slate-500 font-mono mt-1">控制时间 & 动态模糊</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div class="space-y-6">
+                        <p class="text-slate-300 text-sm leading-relaxed">
+                            快门决定了传感器暴露在光线下的时间长短。
+                        </p>
+                        
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <label class="text-xs font-bold text-slate-400 font-mono tracking-wider">SPEED (速度)</label>
+                                <span id="s-display" class="text-sm text-orange-400 font-mono font-bold">1/250s</span>
+                            </div>
+                            <input type="range" id="s-slider" min="0" max="5" step="1" value="2">
+                        </div>
+
+                        <div class="bg-orange-900/20 border-l-2 border-orange-500 p-3 rounded-r">
+                            <p class="text-xs text-slate-400">
+                                <strong class="text-orange-400 block mb-1">副作用：动态模糊 (Motion Blur)</strong>
+                                快门快 (1/1000s) → 凝固瞬间<br>
+                                快门慢 (1/15s) → 运动拖影
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="visual-box">
+                        <div class="shutter-scene">
+                            <div class="road"></div>
+                            <div class="car-wrapper" id="car-anim">
+                                <div class="car-body"></div>
+                                <div class="car-wheel w1"></div>
+                                <div class="car-wheel w2"></div>
+                            </div>
+                            <div class="absolute top-3 right-3 text-[10px] text-slate-600 font-mono border border-slate-800 px-2 rounded">SIMULATION</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. ISO 模块 -->
+            <div class="glass-panel p-6 theme-red">
+                <div class="flex items-center mb-6 border-l-4 border-red-500 pl-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-white">3. 感光度 (ISO)</h2>
+                        <p class="text-xs text-slate-500 font-mono mt-1">信号增益 & 噪点</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div class="space-y-6">
+                        <p class="text-slate-300 text-sm leading-relaxed">
+                            ISO 是对光线信号的电子放大倍率。
+                        </p>
+                        
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <label class="text-xs font-bold text-slate-400 font-mono tracking-wider">GAIN (增益值)</label>
+                                <span id="iso-display" class="text-sm text-red-400 font-mono font-bold">100</span>
+                            </div>
+                            <input type="range" id="iso-slider" min="0" max="4" step="1" value="0">
+                        </div>
+
+                        <div class="bg-red-900/20 border-l-2 border-red-500 p-3 rounded-r">
+                            <p class="text-xs text-slate-400">
+                                <strong class="text-red-400 block mb-1">副作用：噪点 (Noise)</strong>
+                                ISO 低 (100) → 信号纯净<br>
+                                ISO 高 (6400) → 噪点爆炸（画质下降）
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="visual-box">
+                        <canvas id="iso-scope"></canvas>
+                        <div class="absolute bottom-3 left-3 text-[10px] text-red-500/50 font-mono">SIGNAL OSCILLOSCOPE</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. 综合实战模块 -->
+            <div class="glass-panel p-6 theme-green">
+                <div class="flex items-center justify-between mb-6 border-l-4 border-emerald-500 pl-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-white">4. 综合实战：曝光平衡</h2>
+                        <p class="text-xs text-slate-500 font-mono mt-1">模拟真实取景器 (Viewfinder)</p>
+                    </div>
+                </div>
+                
+                <div class="sim-preview mb-6" id="final-image">
+                    <div class="noise-layer" id="noise-overlay"></div>
+                    
+                    <!-- 模拟相机参数覆盖层 -->
+                    <div class="absolute bottom-4 left-0 right-0 px-6 flex justify-between items-end text-white/90 font-mono text-xs pointer-events-none drop-shadow-md">
+                        <div>
+                            <span class="block text-[10px] opacity-70">MODE</span>
+                            <span class="font-bold">M (Manual)</span>
+                        </div>
+                        <div class="flex gap-4">
+                            <div>
+                                <span class="block text-[10px] opacity-70">S</span>
+                                <span id="osd-s" class="font-bold">1/125</span>
+                            </div>
+                            <div>
+                                <span class="block text-[10px] opacity-70">F</span>
+                                <span id="osd-f" class="font-bold">2.8</span>
+                            </div>
+                            <div>
+                                <span class="block text-[10px] opacity-70">ISO</span>
+                                <span id="osd-iso" class="font-bold">100</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <!-- 测光表 -->
+                    <div class="bg-black/40 rounded-lg p-4 border border-slate-700/50">
+                        <div class="flex justify-between text-[10px] text-slate-500 font-mono mb-1">
+                            <span>-3</span>
+                            <span>-2</span>
+                            <span>-1</span>
+                            <span class="text-white">0</span>
+                            <span>+1</span>
+                            <span>+2</span>
+                            <span>+3</span>
+                        </div>
+                        <div class="h-2 bg-slate-800 rounded-full relative overflow-hidden">
+                            <div class="absolute left-1/2 top-0 bottom-0 w-0.5 bg-white z-10 -ml-[1px]"></div>
+                            <div id="meter-fill" class="meter-fill h-full bg-emerald-500 absolute left-0 w-1/2 opacity-80"></div>
+                        </div>
+                        <div class="text-center mt-2">
+                            <span id="meter-text" class="text-xs font-mono font-bold text-emerald-400">曝光准确 (±0 EV)</span>
+                        </div>
+                    </div>
+
+                    <!-- 清晰度指示条 -->
+                    <div class="bg-black/40 rounded-lg p-4 border border-slate-700/50">
+                        <div class="flex justify-between items-end mb-1">
+                            <span class="text-[10px] text-slate-500 font-mono">SHARPNESS (清晰度)</span>
+                            <span id="sharpness-text" class="text-[10px] text-blue-400 font-mono font-bold">100%</span>
+                        </div>
+                        <div class="h-2 bg-slate-800 rounded-full relative overflow-hidden">
+                            <div id="sharpness-fill" class="sharpness-fill h-full bg-blue-500 absolute left-0 w-full opacity-80"></div>
+                        </div>
+                        <div class="text-center mt-2 flex justify-between text-[10px] text-slate-600">
+                            <span>模糊</span>
+                            <span>锐利</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 综合控制 -->
+                <div class="grid grid-cols-3 gap-4">
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500 font-mono block mb-2">光圈 (APERTURE)</label>
+                        <input type="range" id="sim-f" min="0" max="4" step="1" value="2">
+                        <div class="text-center text-xs text-slate-300 font-mono mt-1" id="sim-f-val">f/2.8</div>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500 font-mono block mb-2">快门 (SHUTTER)</label>
+                        <input type="range" id="sim-s" min="0" max="4" step="1" value="2">
+                        <div class="text-center text-xs text-slate-300 font-mono mt-1" id="sim-s-val">1/125s</div>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500 font-mono block mb-2">感光度 (ISO)</label>
+                        <input type="range" id="sim-iso" min="0" max="4" step="1" value="0">
+                        <div class="text-center text-xs text-slate-300 font-mono mt-1" id="sim-iso-val">100</div>
+                    </div>
+                </div>
+                
+                <p class="text-center text-xs text-slate-500 mt-6 border-t border-slate-700/50 pt-4">
+                    任务：调整参数使测光表归零，同时尽量保持“清晰度”指示条满格。
+                </p>
+            </div>
+        </div>
+
+        <!-- 底部 Footer -->
+        <footer class="mt-20 pb-12 pt-8 border-t border-white/5">
+            <div class="flex flex-col items-center justify-center text-center">
+                <div class="w-12 h-0.5 bg-gradient-to-r from-transparent via-blue-500/40 to-transparent mb-6"></div>
+                
+                <h3 class="text-slate-300/90 text-sm font-light tracking-[0.2em] mb-3 font-sans opacity-90 hover:opacity-100 transition-opacity cursor-default select-none">
+                    雪云飞星的摄影日记
+                </h3>
+                
+                <p class="text-[10px] text-slate-600 font-mono tracking-wide">
+                    "Logic takes you from A to B; Imagination takes you everywhere."
+                </p>
+            </div>
+        </footer>
+
+    </div>
+
+    <script>
+        // --- 1. 光圈可视化逻辑 ---
+        const fStops = [1.8, 2.8, 4.0, 8.0, 16.0]; // 调整为更常用的档位
+        const fSlider = document.getElementById('f-slider');
+        const fDisplay = document.getElementById('f-display');
+        const bladesPath = document.getElementById('blades-path');
+
+        function updateAperture(valIndex) {
+            const fVal = fStops[valIndex];
+            fDisplay.innerText = "f/" + fVal;
+            const maxR = 90; // 与 lens-ring 半径一致
+            const currentR = maxR * (1.8 / fVal) * 0.9; // 略微调整比例
+
+            // 使用外圆（镜头轮廓）减去内圆（光圈孔）的方式，确保看起来是圆形的镜头
+            // 外圆半径 90
+            const path = `
+                M 100 10
+                A 90 90 0 1 1 100 190
+                A 90 90 0 1 1 100 10
+                Z
+                M 100 ${100 - currentR} 
+                A ${currentR} ${currentR} 0 1 0 100 ${100 + currentR}
+                A ${currentR} ${currentR} 0 1 0 100 ${100 - currentR} 
+                Z
+            `;
+            bladesPath.setAttribute("d", path);
+            bladesPath.setAttribute("fill-rule", "evenodd");
+        }
+        fSlider.addEventListener('input', (e) => updateAperture(e.target.value));
+        updateAperture(1);
+
+        // --- 2. 快门可视化逻辑 ---
+        const sSpeeds = ["1/1000s", "1/250s", "1/60s", "1/15s", "1/4s", "1s"];
+        const sBlurs = [0, 1, 3, 8, 20, 50]; 
+        const sSlider = document.getElementById('s-slider');
+        const sDisplay = document.getElementById('s-display');
+        const carAnim = document.getElementById('car-anim');
+
+        let carX = -100;
+        function animLoop() {
+            carX += 4; 
+            if(carX > 500) carX = -150;
+            carAnim.style.transform = `translate3d(${carX}px, 0, 0)`;
+            requestAnimationFrame(animLoop);
+        }
+        requestAnimationFrame(animLoop);
+
+        sSlider.addEventListener('input', (e) => {
+            const idx = e.target.value;
+            sDisplay.innerText = sSpeeds[idx];
+            carAnim.style.filter = `blur(${sBlurs[idx]}px)`;
+            carAnim.style.opacity = idx > 3 ? 0.7 : 1;
+        });
+
+        // --- 3. ISO 示波器逻辑 ---
+        const isoVals = [100, 400, 1600, 3200, 12800];
+        const isoSlider = document.getElementById('iso-slider');
+        const isoDisplay = document.getElementById('iso-display');
+        const canvas = document.getElementById('iso-scope');
+        const ctx = canvas.getContext('2d');
+
+        // Resize canvas
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.offsetWidth;
+            canvas.height = canvas.parentElement.offsetHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        
+        let time = 0;
+        function drawScope() {
+            ctx.fillStyle = "#000";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Grid
+            ctx.strokeStyle = "#1a1a1a";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            for(let i=0; i<canvas.width; i+=40) { ctx.moveTo(i,0); ctx.lineTo(i, canvas.height); }
+            for(let i=0; i<canvas.height; i+=40) { ctx.moveTo(0,i); ctx.lineTo(canvas.width, i); }
+            ctx.stroke();
+
+            const idx = isoSlider.value;
+            const noiseFactor = idx * 12; 
+            
+            ctx.beginPath();
+            ctx.strokeStyle = "#ef4444"; 
+            ctx.lineWidth = 2;
+            ctx.shadowBlur = 4;
+            ctx.shadowColor = "#ef4444";
+            
+            const centerY = canvas.height / 2;
+            for(let x=0; x<canvas.width; x++) {
+                let y = centerY + Math.sin((x + time) * 0.05) * 60;
+                let noise = (Math.random() - 0.5) * noiseFactor;
+                y += noise;
+                if(x===0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+            ctx.shadowBlur = 0; // reset
+            
+            time += 2;
+            requestAnimationFrame(drawScope);
+        }
+        drawScope();
+        isoSlider.addEventListener('input', (e) => isoDisplay.innerText = isoVals[e.target.value]);
+
+        // --- 4. 综合模拟逻辑 ---
+        const sim_f = document.getElementById('sim-f');
+        const sim_s = document.getElementById('sim-s');
+        const sim_iso = document.getElementById('sim-iso');
+        
+        const sim_f_txt = document.getElementById('sim-f-val');
+        const sim_s_txt = document.getElementById('sim-s-val');
+        const sim_iso_txt = document.getElementById('sim-iso-val');
+        
+        // OSD elements
+        const osd_f = document.getElementById('osd-f');
+        const osd_s = document.getElementById('osd-s');
+        const osd_iso = document.getElementById('osd-iso');
+
+        const finalImg = document.getElementById('final-image');
+        const noiseOverlay = document.getElementById('noise-overlay');
+        const meterFill = document.getElementById('meter-fill');
+        const meterText = document.getElementById('meter-text');
+        
+        // Sharpness elements
+        const sharpnessFill = document.getElementById('sharpness-fill');
+        const sharpnessText = document.getElementById('sharpness-text');
+
+        // 更新的 EV 映射表，使参数更合理
+        // f-stop: f/1.8, f/2.8, f/4, f/8, f/16
+        // EV:     5,     4,     3,   2,    1  (大光圈亮)
+        const f_ev_map = [5, 4, 3, 2, 1];
+        
+        // shutter: 1/1000, 1/250, 1/60, 1/15, 1s
+        // EV:      1,      2,     3,    4,    5  (慢快门亮)
+        const s_ev_map = [1, 2, 3, 4, 5];
+        
+        // iso:     100, 400, 1600, 3200, 12800
+        // EV:      1,   2,   3,    4,    5    (高感亮)
+        const iso_ev_map = [1, 2, 3, 4, 5];
+        
+        const f_labels = ["f/1.8", "f/2.8", "f/4", "f/8", "f/16"];
+        const s_labels = ["1/1000", "1/250", "1/60", "1/15", "1s"];
+        const iso_labels = ["100", "400", "1600", "3200", "12800"];
+        
+        const s_labels_osd = ["1/1000", "1/250", "1/60", "1/15", "1\""];
+        
+        // **新的模糊逻辑**：模拟高素质镜头和风景拍摄
+        // 光圈模糊（假设对焦在无穷远）：f/1.8稍软，f/2.8一般，f/4及以上非常锐利
+        const dofBlurLevels = [3, 1.5, 0, 0, 0]; 
+        
+        // 运动模糊：1/1000, 1/250, 1/60 都算清晰(手持安全快门)，1/15开始糊
+        const motionBlurLevels = [0, 0, 0, 2, 5];
+
+        function updateSim() {
+            const fi = parseInt(sim_f.value);
+            const si = parseInt(sim_s.value);
+            const ii = parseInt(sim_iso.value);
+
+            // Update UI Texts
+            sim_f_txt.innerText = f_labels[fi];
+            sim_s_txt.innerText = s_labels[si];
+            sim_iso_txt.innerText = iso_labels[ii];
+
+            // Update OSD
+            osd_f.innerText = f_labels[fi].replace("f/", "");
+            osd_s.innerText = s_labels_osd[si];
+            osd_iso.innerText = iso_labels[ii];
+
+            // Calc EV
+            const currentEV = f_ev_map[fi] + s_ev_map[si] + iso_ev_map[ii];
+            // 目标EV调整为 6
+            // 例如: f/8(2) + 1/60(3) + ISO100(1) = 6 (完美曝光)
+            // 例如: f/4(3) + 1/250(2) + ISO100(1) = 6 (完美曝光)
+            const targetEV = 6; 
+            const diff = currentEV - targetEV;
+
+            // Meter (Range: 0% to 100%, 50% is 0EV)
+            let percentage = 50 + (diff * 16.6); 
+            if(percentage < 5) percentage = 5; 
+            if(percentage > 95) percentage = 95;
+            meterFill.style.width = percentage + "%";
+
+            // Colors & Status
+            let statusStr = "";
+            let colorClass = "";
+            
+            if(Math.abs(diff) < 0.8) {
+                colorClass = "bg-emerald-500";
+                statusStr = "曝光准确 (0 EV)";
+                meterText.className = "text-xs font-mono font-bold text-emerald-400";
+            } else if (diff < 0) {
+                colorClass = "bg-yellow-500"; // Underexposed
+                statusStr = `曝光不足 (${diff.toFixed(1)} EV)`;
+                meterText.className = "text-xs font-mono font-bold text-yellow-400";
+            } else {
+                colorClass = "bg-red-500"; // Overexposed
+                statusStr = `曝光过度 (+${diff.toFixed(1)} EV)`;
+                meterText.className = "text-xs font-mono font-bold text-red-400";
+            }
+            meterFill.className = `meter-fill h-full absolute left-0 opacity-80 ${colorClass}`;
+            meterText.innerText = statusStr;
+
+            // Effects & Sharpness Calculation
+            // 增加对比度，让画面在准确曝光时看起来更“透”
+            let brightness = 100 + (diff * 18); 
+            if(brightness < 10) brightness = 10;
+            
+            const totalBlur = dofBlurLevels[fi] + motionBlurLevels[si];
+            
+            // Calculate Sharpness Percentage
+            let sharpnessPct = 100 - (totalBlur * 15);
+            if(sharpnessPct < 0) sharpnessPct = 0;
+            if(sharpnessPct > 95) sharpnessPct = 100; // 容错显示
+            
+            sharpnessFill.style.width = sharpnessPct + "%";
+            sharpnessText.innerText = sharpnessPct + "%";
+            
+            if(sharpnessPct > 80) {
+                sharpnessFill.className = "sharpness-fill h-full absolute left-0 opacity-80 bg-blue-500";
+            } else if (sharpnessPct > 40) {
+                sharpnessFill.className = "sharpness-fill h-full absolute left-0 opacity-80 bg-yellow-500";
+            } else {
+                sharpnessFill.className = "sharpness-fill h-full absolute left-0 opacity-80 bg-red-500";
+            }
+
+            finalImg.style.filter = `brightness(${brightness}%) blur(${totalBlur}px) contrast(1.1)`;
+            
+            const noiseOp = ii * 0.15; 
+            noiseOverlay.style.opacity = noiseOp;
+        }
+
+        sim_f.addEventListener('input', updateSim);
+        sim_s.addEventListener('input', updateSim);
+        sim_iso.addEventListener('input', updateSim);
+        updateSim();
+
+    </script>
+</body>
+</html>
