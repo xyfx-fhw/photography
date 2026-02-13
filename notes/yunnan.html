@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>滇西北纪行 - 摄影画册 | 雪云飞星</title>
+    <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root { --bg-color: #0f1112; --accent-color: #c5a059; --text-main: #e2e2e2; }
+        body { font-family: 'Noto Sans SC', sans-serif; background-color: var(--bg-color); color: var(--text-main); }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .masonry { column-count: 1; column-gap: 1.5rem; }
+        @media (min-width: 768px) { .masonry { column-count: 2; } }
+        @media (min-width: 1024px) { .masonry { column-count: 3; } }
+        .masonry-item { break-inside: avoid; margin-bottom: 1.5rem; transform: translateY(20px); opacity: 0; transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+        .masonry-item.loaded { transform: translateY(0); opacity: 1; }
+    </style>
+</head>
+<body class="antialiased">
+    <nav class="fixed top-0 w-full z-50 px-8 py-6 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent">
+        <a href="../index.html" class="flex items-center text-xs uppercase tracking-[0.3em] text-gray-400 hover:text-[#c5a059] transition-colors group">
+            <i data-lucide="arrow-left" class="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform"></i> 返回首页
+        </a>
+    </nav>
+
+    <header class="pt-40 pb-20 px-8 max-w-7xl mx-auto border-b border-white/5">
+        <div class="flex flex-col md:flex-row md:items-end justify-between">
+            <div>
+                <span class="text-[#c5a059] text-[10px] uppercase tracking-widest">Travel Log · 2025.02</span>
+                <h1 class="text-5xl md:text-7xl font-serif italic mt-4 mb-6 text-white">滇西北纪行</h1>
+                <p class="text-gray-500 max-w-2xl leading-relaxed font-light text-sm">大理、丽江、香格里拉与梅里雪山。离天空最近的旅程。</p>
+            </div>
+            <div class="mt-8 md:mt-0 text-right">
+                <div class="flex items-center justify-end space-x-2 text-[#c5a059] mb-1">
+                    <i data-lucide="map-pin" class="w-4 h-4"></i>
+                    <span class="text-sm font-serif italic text-white text-right">中国 · 滇西北</span>
+                </div>
+                <p class="text-[10px] text-gray-600 tracking-tighter uppercase">Dali, Lijiang & Meili</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="px-8 py-20 max-w-7xl mx-auto">
+        <div id="photo-grid" class="masonry"></div>
+    </main>
+
+    <div id="lightbox" class="fixed inset-0 bg-[#0a0a0a]/98 z-[100] hidden flex flex-col items-center justify-center p-4 cursor-zoom-out" onclick="closeLightbox()">
+        <img id="lightboxImg" class="max-w-full max-h-[90vh] shadow-2xl transition-transform duration-500 scale-95" src="">
+    </div>
+
+    <script>
+        
+        
+        function loadGallery() {
+            const photos = [
+        {
+                "url": "../images/yunnan/DSCF0508.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF0508"
+        },
+        {
+                "url": "../images/yunnan/DSCF0560.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF0560"
+        },
+        {
+                "url": "../images/yunnan/DSCF0578.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF0578"
+        },
+        {
+                "url": "../images/yunnan/DSCF0599.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF0599"
+        },
+        {
+                "url": "../images/yunnan/DSCF0606.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF0606"
+        },
+        {
+                "url": "../images/yunnan/DSCF0607.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF0607"
+        },
+        {
+                "url": "../images/yunnan/DSCF0618.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF0618"
+        },
+        {
+                "url": "../images/yunnan/DSCF0619.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF0619"
+        },
+        {
+                "url": "../images/yunnan/DSCF0622.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF0622"
+        },
+        {
+                "url": "../images/yunnan/DSCF0655.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF0655"
+        },
+        {
+                "url": "../images/yunnan/DSCF0704.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF0704"
+        },
+        {
+                "url": "../images/yunnan/DSCF0714.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF0714"
+        },
+        {
+                "url": "../images/yunnan/DSCF0722.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF0722"
+        },
+        {
+                "url": "../images/yunnan/DSCF0725.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF0725"
+        },
+        {
+                "url": "../images/yunnan/DSCF0726.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF0726"
+        },
+        {
+                "url": "../images/yunnan/DSCF0733.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF0733"
+        },
+        {
+                "url": "../images/yunnan/DSCF0740.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF0740"
+        },
+        {
+                "url": "../images/yunnan/DSCF0743.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF0743"
+        },
+        {
+                "url": "../images/yunnan/DSCF0748.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF0748"
+        },
+        {
+                "url": "../images/yunnan/DSCF0749.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF0749"
+        },
+        {
+                "url": "../images/yunnan/DSCF0750.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF0750"
+        },
+        {
+                "url": "../images/yunnan/DSCF0752.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF0752"
+        },
+        {
+                "url": "../images/yunnan/DSCF0774.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF0774"
+        },
+        {
+                "url": "../images/yunnan/DSCF0779.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF0779"
+        },
+        {
+                "url": "../images/yunnan/DSCF0780.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF0780"
+        },
+        {
+                "url": "../images/yunnan/DSCF0781.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF0781"
+        },
+        {
+                "url": "../images/yunnan/DSCF0790.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF0790"
+        },
+        {
+                "url": "../images/yunnan/DSCF0828.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF0828"
+        },
+        {
+                "url": "../images/yunnan/DSCF0832.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF0832"
+        },
+        {
+                "url": "../images/yunnan/DSCF0847.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF0847"
+        },
+        {
+                "url": "../images/yunnan/DSCF0848.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF0848"
+        },
+        {
+                "url": "../images/yunnan/DSCF0849.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF0849"
+        },
+        {
+                "url": "../images/yunnan/DSCF0862.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF0862"
+        },
+        {
+                "url": "../images/yunnan/DSCF0879.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF0879"
+        },
+        {
+                "url": "../images/yunnan/DSCF0905.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF0905"
+        },
+        {
+                "url": "../images/yunnan/DSCF0906.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF0906"
+        },
+        {
+                "url": "../images/yunnan/DSCF0908.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF0908"
+        },
+        {
+                "url": "../images/yunnan/DSCF0909.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF0909"
+        },
+        {
+                "url": "../images/yunnan/DSCF0924.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF0924"
+        },
+        {
+                "url": "../images/yunnan/DSCF0929.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF0929"
+        },
+        {
+                "url": "../images/yunnan/DSCF0930.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF0930"
+        },
+        {
+                "url": "../images/yunnan/DSCF0931.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF0931"
+        },
+        {
+                "url": "../images/yunnan/DSCF0932.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF0932"
+        },
+        {
+                "url": "../images/yunnan/DSCF0942.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF0942"
+        },
+        {
+                "url": "../images/yunnan/DSCF0951.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF0951"
+        },
+        {
+                "url": "../images/yunnan/DSCF0953.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF0953"
+        },
+        {
+                "url": "../images/yunnan/DSCF0973.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF0973"
+        },
+        {
+                "url": "../images/yunnan/DSCF0987.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF0987"
+        },
+        {
+                "url": "../images/yunnan/DSCF0994.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF0994"
+        },
+        {
+                "url": "../images/yunnan/DSCF0995.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF0995"
+        },
+        {
+                "url": "../images/yunnan/DSCF1026.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1026"
+        },
+        {
+                "url": "../images/yunnan/DSCF1036.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1036"
+        },
+        {
+                "url": "../images/yunnan/DSCF1045.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1045"
+        },
+        {
+                "url": "../images/yunnan/DSCF1048.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF1048"
+        },
+        {
+                "url": "../images/yunnan/DSCF1061.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF1061"
+        },
+        {
+                "url": "../images/yunnan/DSCF1121.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1121"
+        },
+        {
+                "url": "../images/yunnan/DSCF1124.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1124"
+        },
+        {
+                "url": "../images/yunnan/DSCF1131.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1131"
+        },
+        {
+                "url": "../images/yunnan/DSCF1150.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1150"
+        },
+        {
+                "url": "../images/yunnan/DSCF1153.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF1153"
+        },
+        {
+                "url": "../images/yunnan/DSCF1164.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1164"
+        },
+        {
+                "url": "../images/yunnan/DSCF1170.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1170"
+        },
+        {
+                "url": "../images/yunnan/DSCF1172.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1172"
+        },
+        {
+                "url": "../images/yunnan/DSCF1177.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1177"
+        },
+        {
+                "url": "../images/yunnan/DSCF1179.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF1179"
+        },
+        {
+                "url": "../images/yunnan/DSCF1188.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1188"
+        },
+        {
+                "url": "../images/yunnan/DSCF1190.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF1190"
+        },
+        {
+                "url": "../images/yunnan/DSCF1202.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1202"
+        },
+        {
+                "url": "../images/yunnan/DSCF1205.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1205"
+        },
+        {
+                "url": "../images/yunnan/DSCF1247.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1247"
+        },
+        {
+                "url": "../images/yunnan/DSCF1250.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1250"
+        },
+        {
+                "url": "../images/yunnan/DSCF1251.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1251"
+        },
+        {
+                "url": "../images/yunnan/DSCF1252.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1252"
+        },
+        {
+                "url": "../images/yunnan/DSCF1268.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1268"
+        },
+        {
+                "url": "../images/yunnan/DSCF1293.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1293"
+        },
+        {
+                "url": "../images/yunnan/DSCF1301.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF1301"
+        },
+        {
+                "url": "../images/yunnan/DSCF1305.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1305"
+        },
+        {
+                "url": "../images/yunnan/DSCF1309.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1309"
+        },
+        {
+                "url": "../images/yunnan/DSCF1326.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1326"
+        },
+        {
+                "url": "../images/yunnan/DSCF1329.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1329"
+        },
+        {
+                "url": "../images/yunnan/DSCF1330.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF1330"
+        },
+        {
+                "url": "../images/yunnan/DSCF1339.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF1339"
+        },
+        {
+                "url": "../images/yunnan/DSCF1343.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF1343"
+        },
+        {
+                "url": "../images/yunnan/DSCF1352.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1352"
+        },
+        {
+                "url": "../images/yunnan/DSCF1355.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1355"
+        },
+        {
+                "url": "../images/yunnan/DSCF1374.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1374"
+        },
+        {
+                "url": "../images/yunnan/DSCF1407.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF1407"
+        },
+        {
+                "url": "../images/yunnan/DSCF1409.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF1409"
+        },
+        {
+                "url": "../images/yunnan/DSCF1411.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF1411"
+        },
+        {
+                "url": "../images/yunnan/DSCF1412.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF1412"
+        },
+        {
+                "url": "../images/yunnan/DSCF1423.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1423"
+        },
+        {
+                "url": "../images/yunnan/DSCF1424.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1424"
+        },
+        {
+                "url": "../images/yunnan/DSCF1439.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1439"
+        },
+        {
+                "url": "../images/yunnan/DSCF1446.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF1446"
+        },
+        {
+                "url": "../images/yunnan/DSCF1449.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1449"
+        },
+        {
+                "url": "../images/yunnan/DSCF1450.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1450"
+        },
+        {
+                "url": "../images/yunnan/DSCF1460.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1460"
+        },
+        {
+                "url": "../images/yunnan/DSCF1476.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF1476"
+        },
+        {
+                "url": "../images/yunnan/DSCF1515.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1515"
+        },
+        {
+                "url": "../images/yunnan/DSCF1538.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1538"
+        },
+        {
+                "url": "../images/yunnan/DSCF1549.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF1549"
+        },
+        {
+                "url": "../images/yunnan/DSCF1607.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1607"
+        },
+        {
+                "url": "../images/yunnan/DSCF1609.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1609"
+        },
+        {
+                "url": "../images/yunnan/DSCF1622.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF1622"
+        },
+        {
+                "url": "../images/yunnan/DSCF1623.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1623"
+        },
+        {
+                "url": "../images/yunnan/DSCF1675.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1675"
+        },
+        {
+                "url": "../images/yunnan/DSCF1684.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF1684"
+        },
+        {
+                "url": "../images/yunnan/DSCF1698.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1698"
+        },
+        {
+                "url": "../images/yunnan/DSCF1717.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1717"
+        },
+        {
+                "url": "../images/yunnan/DSCF1743.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1743"
+        },
+        {
+                "url": "../images/yunnan/DSCF1751.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1751"
+        },
+        {
+                "url": "../images/yunnan/DSCF1792.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF1792"
+        },
+        {
+                "url": "../images/yunnan/DSCF1799.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF1799"
+        },
+        {
+                "url": "../images/yunnan/DSCF1809.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1809"
+        },
+        {
+                "url": "../images/yunnan/DSCF1818.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1818"
+        },
+        {
+                "url": "../images/yunnan/DSCF1841.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF1841"
+        },
+        {
+                "url": "../images/yunnan/DSCF1884.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1884"
+        },
+        {
+                "url": "../images/yunnan/DSCF1885.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1885"
+        },
+        {
+                "url": "../images/yunnan/DSCF1886.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1886"
+        },
+        {
+                "url": "../images/yunnan/DSCF1904.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF1904"
+        },
+        {
+                "url": "../images/yunnan/DSCF1909.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1909"
+        },
+        {
+                "url": "../images/yunnan/DSCF1910.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1910"
+        },
+        {
+                "url": "../images/yunnan/DSCF1912.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1912"
+        },
+        {
+                "url": "../images/yunnan/DSCF1913.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF1913"
+        },
+        {
+                "url": "../images/yunnan/DSCF1914.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF1914"
+        },
+        {
+                "url": "../images/yunnan/DSCF1917.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF1917"
+        },
+        {
+                "url": "../images/yunnan/DSCF1925.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1925"
+        },
+        {
+                "url": "../images/yunnan/DSCF1935.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1935"
+        },
+        {
+                "url": "../images/yunnan/DSCF1958.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1958"
+        },
+        {
+                "url": "../images/yunnan/DSCF1963.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF1963"
+        },
+        {
+                "url": "../images/yunnan/DSCF1970.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1970"
+        },
+        {
+                "url": "../images/yunnan/DSCF1973.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF1973"
+        },
+        {
+                "url": "../images/yunnan/DSCF1976.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1976"
+        },
+        {
+                "url": "../images/yunnan/DSCF1977.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1977"
+        },
+        {
+                "url": "../images/yunnan/DSCF1985.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF1985"
+        },
+        {
+                "url": "../images/yunnan/DSCF1988.webp",
+                "width": 2560,
+                "height": 1706,
+                "title": "DSCF1988"
+        },
+        {
+                "url": "../images/yunnan/IMG_0530.webp",
+                "width": 2560,
+                "height": 3413,
+                "title": "IMG_0530"
+        },
+        {
+                "url": "../images/yunnan/IMG_0637.webp",
+                "width": 2560,
+                "height": 1920,
+                "title": "IMG_0637"
+        },
+        {
+                "url": "../images/yunnan/IMG_0849.webp",
+                "width": 2560,
+                "height": 3815,
+                "title": "IMG_0849"
+        },
+        {
+                "url": "../images/yunnan/IMG_1139.webp",
+                "width": 2560,
+                "height": 3413,
+                "title": "IMG_1139"
+        },
+        {
+                "url": "../images/yunnan/IMG_1617.webp",
+                "width": 1264,
+                "height": 848,
+                "title": "IMG_1617"
+        },
+        {
+                "url": "../images/yunnan/IMG_1755.webp",
+                "width": 2560,
+                "height": 1396,
+                "title": "IMG_1755"
+        }
+];
+            const grid = document.getElementById('photo-grid');
+            if (!grid) return;
+            grid.innerHTML = photos.map(p => `
+                <div class="masonry-item group cursor-zoom-in overflow-hidden rounded-sm bg-neutral-900" onclick="openLightbox('${p.url}')">
+                    <img src="${p.url}" class="w-full h-auto hover:scale-[1.03] transition-transform duration-700" onload="this.parentElement.classList.add('loaded')" loading="lazy">
+                </div>
+            `).join('');
+            if(window.lucide) lucide.createIcons();
+        }
+        
+        function openLightbox(src) {
+            const lb = document.getElementById('lightbox');
+            const img = document.getElementById('lightboxImg');
+            img.src = src;
+            lb.classList.remove('hidden');
+            setTimeout(() => img.classList.remove('scale-95'), 10);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox() {
+            const lb = document.getElementById('lightbox');
+            const img = document.getElementById('lightboxImg');
+            img.classList.add('scale-95');
+            setTimeout(() => { lb.classList.add('hidden'); document.body.style.overflow = 'auto'; }, 300);
+        }
+
+        window.onload = loadGallery;
+    </script>
+</body>
+</html>
