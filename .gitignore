@@ -1,0 +1,28 @@
+# Images
+raw_photos/
+*.HEIC
+*.heic
+*.JPG
+*.jpg
+*.DNG
+*.dng
+*.png
+
+# Environments
+.venv/
+env/
+venv/
+ENV/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Local config
+.vscode/
