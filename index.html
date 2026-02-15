@@ -96,7 +96,7 @@
     </nav>
 
     <!-- 首页 -->
-    <section id="home" class="hero-bg h-screen flex flex-col justify-center items-center text-center px-4">
+    <section id="home" class="hero-bg h-screen flex flex-col justify-center items-center text-center px-4 relative overflow-hidden">
         <!-- 调整后的主标题：更大、更具视觉冲击力 -->
         <h1 class="text-7xl md:text-[120px] font-bold mb-2 tracking-tight text-white font-serif italic leading-none">
             雪云飞星
@@ -109,6 +109,12 @@
         <div class="flex space-x-4">
             <a href="#principles" class="btn-gold px-10 py-3 tracking-widest text-xs uppercase hover:text-black hover:bg-[#c5a059]">摄像原理</a>
             <a href="#gallery" class="bg-white/10 backdrop-blur-md px-10 py-3 hover:bg-white hover:text-black transition-all duration-500 tracking-widest text-xs uppercase text-white">光影回忆</a>
+        </div>
+
+        <!-- 滚动提示动画 -->
+        <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center animate-bounce opacity-40">
+            <span class="text-[10px] tracking-[0.5em] uppercase mb-2">Scroll</span>
+            <div class="w-[1px] h-12 bg-gradient-to-b from-[#c5a059] to-transparent"></div>
         </div>
     </section>
 
