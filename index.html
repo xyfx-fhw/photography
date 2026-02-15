@@ -7,7 +7,7 @@
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <!-- 引入 Tailwind CSS 和 高级字体 -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,300;0,400;0,700;1,400&family=Noto+Sans+SC:wght@100;300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Noto+Sans+SC:wght@100;300;400;500&display=swap" rel="stylesheet">
     <!-- 引入 Lucide 图标库 -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -27,7 +27,7 @@
             font-family: 'Playfair Display', serif;
         }
         .hero-bg {
-            background: linear-gradient(rgba(26, 28, 30, 0.4), rgba(26, 28, 30, 0.7)),
+            background: linear-gradient(rgba(26, 28, 30, 0.5), rgba(26, 28, 30, 0.8)),
                         url('https://images.unsplash.com/photo-1493246507139-91e8bef99c02?auto=format&fit=crop&q=80&w=1600') center/cover no-repeat;
         }
         .glass-nav {
@@ -56,7 +56,7 @@
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             border-radius: 4px;
             overflow: hidden;
-            display: block;
+            display: block; /* Ensure it's a block for layout */
         }
         @media (max-width: 640px) {
             .gallery-card {
@@ -71,7 +71,6 @@
             border: 1px solid var(--accent-color);
             color: var(--accent-color);
             transition: all 0.3s ease;
-            backdrop-filter: blur(8px);
         }
         .btn-gold:hover {
             background-color: var(--accent-color);
@@ -80,23 +79,12 @@
         .logo-text {
             letter-spacing: 0.15em;
         }
-        /* 文字扫光动画 */
-        .shine-text {
-            background: linear-gradient(120deg, rgba(255,255,255,0) 30%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0) 70%);
-            background-size: 200% auto;
-            background-clip: text;
-            -webkit-background-clip: text;
-            animation: shine 8s linear infinite;
-        }
-        @keyframes shine {
-            to { background-position: 200% center; }
-        }
     </style>
 </head>
 <body class="antialiased">
 
     <!-- 导航栏 -->
-    <nav id="main-nav" class="glass-nav fixed w-full z-50 px-8 py-5 flex justify-between items-center transition-all duration-500">
+    <nav id="main-nav" class="glass-nav fixed w-full z-50 px-8 py-5 flex justify-between items-center">
         <a href="#home" class="logo-text text-2xl font-serif font-bold text-[#c5a059]">雪云飞星</a>
         <div class="hidden md:flex space-x-10 text-xs uppercase tracking-[0.2em] font-medium">
             <a href="#home" class="hover:text-[#c5a059] transition-colors">首页</a>
@@ -104,40 +92,23 @@
             <a href="#gallery" class="hover:text-[#c5a059] transition-colors">光影回忆</a>
             <a href="#about" class="hover:text-[#c5a059] transition-colors">关于我</a>
         </div>
-        <div class="md:hidden">
-            <i data-lucide="menu" class="text-[#c5a059] cursor-pointer"></i>
-        </div>
+        <i data-lucide="menu" class="md:hidden text-[#c5a059] cursor-pointer"></i>
     </nav>
 
-    <!-- 首页 (Hero Section) -->
-    <section id="home" class="hero-bg h-screen flex flex-col justify-center items-center text-center px-4 overflow-hidden">
-        <div class="relative z-10 flex flex-col items-center">
-            <!-- 主标题：雪云飞星 -->
-            <h1 class="text-7xl md:text-[130px] font-bold tracking-tight text-white font-serif italic leading-none mb-4">
-                雪云飞星
-            </h1>
-            
-            <!-- 视觉对等的次主标题：PHOTOGRAPHY -->
-            <!-- 使用超宽字间距 tracking-[0.6em] 和 ml 抵消右侧偏移实现居中 -->
-            <p class="text-4xl md:text-[70px] font-thin tracking-[0.6em] text-[#c5a059] uppercase leading-none mb-12 ml-[0.6em] opacity-80">
-                photography
-            </p>
-            
-            <!-- 引导按钮 -->
-            <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6">
-                <a href="#principles" class="btn-gold px-12 py-4 tracking-[0.3em] text-[10px] uppercase font-medium">
-                    摄像原理
-                </a>
-                <a href="#gallery" class="bg-white/10 backdrop-blur-lg border border-white/20 px-12 py-4 hover:bg-white hover:text-black transition-all duration-500 tracking-[0.3em] text-[10px] uppercase text-white">
-                    光影回忆
-                </a>
-            </div>
-        </div>
-
-        <!-- 装饰线条 -->
-        <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center animate-bounce opacity-40">
-            <span class="text-[10px] tracking-[0.5em] uppercase mb-2">Scroll</span>
-            <div class="w-[1px] h-12 bg-gradient-to-b from-[#c5a059] to-transparent"></div>
+    <!-- 首页 -->
+    <section id="home" class="hero-bg h-screen flex flex-col justify-center items-center text-center px-4">
+        <!-- 调整后的主标题：更大、更具视觉冲击力 -->
+        <h1 class="text-7xl md:text-[120px] font-bold mb-2 tracking-tight text-white font-serif italic leading-none">
+            雪云飞星
+        </h1>
+        <!-- 调整后的 PHOTOGRAPHY：字号加大且字间距极宽，与中文宽度呼应 -->
+        <p class="text-4xl md:text-[70px] font-thin tracking-[0.6em] text-[#c5a059] mb-12 uppercase leading-none ml-[0.6em]">
+            photography
+        </p>
+        
+        <div class="flex space-x-4">
+            <a href="#principles" class="btn-gold px-10 py-3 tracking-widest text-xs uppercase hover:text-black hover:bg-[#c5a059]">摄像原理</a>
+            <a href="#gallery" class="bg-white/10 backdrop-blur-md px-10 py-3 hover:bg-white hover:text-black transition-all duration-500 tracking-widest text-xs uppercase text-white">光影回忆</a>
         </div>
     </section>
 
@@ -151,20 +122,18 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-                <a href="#" class="group block">
-                    <div class="overflow-hidden aspect-video bg-neutral-800 mb-6 relative">
-                        <img src="https://images.unsplash.com/photo-1502982720700-bfff97f2ecac?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 opacity-60" alt="Lens Science">
-                        <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
+                <a href="ray-lab.html" class="group block">
+                    <div class="overflow-hidden aspect-video bg-neutral-800 mb-6">
+                        <img src="https://images.unsplash.com/photo-1502982720700-bfff97f2ecac?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-70" alt="Lens Science">
                     </div>
                     <span class="text-[#c5a059] text-xs font-medium tracking-widest uppercase">镜头科学</span>
                     <h3 class="text-2xl mt-4 mb-3 group-hover:text-[#c5a059] transition-colors text-white">镜头光学原理：焦距与空间重塑</h3>
                     <p class="text-gray-500 text-sm leading-relaxed line-clamp-2">深入探讨定焦与变焦的选择，以及物理对焦行程对虚化效果的影响...</p>
                 </a>
 
-                <a href="#" class="group block">
-                    <div class="overflow-hidden aspect-video bg-neutral-800 mb-6 relative">
-                        <img src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 opacity-60" alt="Exposure">
-                        <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
+                <a href="exposure.html" class="group block">
+                    <div class="overflow-hidden aspect-video bg-neutral-800 mb-6">
+                        <img src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-70" alt="Exposure">
                     </div>
                     <span class="text-[#c5a059] text-xs font-medium tracking-widest uppercase">光影基础</span>
                     <h3 class="text-2xl mt-4 mb-3 group-hover:text-[#c5a059] transition-colors text-white">曝光三要素：快门、感光度与光圈</h3>
@@ -187,7 +156,7 @@
                 <!-- Data will be injected here -->
             </div>
 
-            <p class="text-center text-gray-600 text-[10px] mt-12 tracking-widest uppercase italic">← Drag or Scroll to Explore →</p>
+            <p class="text-center text-gray-600 text-[10px] mt-12 tracking-widest uppercase italic">← Scroll to Explore →</p>
         </div>
     </section>
 
@@ -229,8 +198,8 @@
                 location: '云南 · 大理/丽江/香格里拉',
                 device: 'Fujifilm X-E5',
                 date: '2026.01',
-                url: '#',
-                cover: 'https://images.unsplash.com/photo-1520262454473-a1a82276a574?auto=format&fit=crop&q=80&w=800',
+                url: 'notes/yunnan.html',
+                cover: 'images/yunnan/DSCF1885.webp',
                 desc: '从大理、丽江、香格里拉到梅里雪山，在飞来寺等待日照金山的永恒。'
             },
             {
@@ -239,18 +208,18 @@
                 location: '印尼 · 巴厘岛/佩尼达岛',
                 device: 'iPhone 16 Pro',
                 date: '2025.06',
-                url: '#',
-                cover: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&q=80&w=800',
+                url: 'notes/indonesia.html',
+                cover: 'images/indonesia/IMG_0340.webp',
                 desc: '漫步巴厘岛的梯田，在佩尼达岛的悬崖边缘感受海洋的律动。'
             },
             {
                 id: 'aba',
                 title: '川北秘境：秋色巡演',
-                location: '四川 · 毕棚沟/达古冰川/九寨沟',
+                location: '四川 · 毕棚沟/达古冰川/九寨沟/黄龙',
                 device: 'iPhone 14 Pro',
                 date: '2024.10',
-                url: '#',
-                cover: 'https://images.unsplash.com/photo-1542332213-9b5a5a3fad35?auto=format&fit=crop&q=80&w=800',
+                url: 'notes/aba.html',
+                cover: 'images/aba/IMG_6930.webp',
                 desc: '九寨沟、黄龙、达古冰川与毕棚沟，在深秋奏响的光影协奏曲。'
             }
         ];
@@ -262,7 +231,7 @@
             container.innerHTML = galleries.map(g => `
                 <a href="${g.url}" class="gallery-card group">
                     <div class="aspect-[4/5] overflow-hidden">
-                        <img src="${g.cover}" class="w-full h-full object-cover group-hover:scale-110 transition-all duration-1000" alt="${g.title}">
+                        <img src="${g.cover}" class="w-full h-full object-cover group-hover:scale-110 transition-all duration-700" alt="${g.title}" onerror="this.src='https://images.unsplash.com/photo-1542332213-9b5a5a3fad35?auto=format&fit=crop&q=80&w=800'">
                     </div>
                     <div class="p-8">
                         <div class="flex items-center space-x-2 mb-2 text-[10px] text-[#c5a059] tracking-widest uppercase">
@@ -286,11 +255,13 @@
                 </a>
             `).join('');
 
+            // Re-initialize Lucide icons for injected content
             if (window.lucide) {
                 window.lucide.createIcons();
             }
         }
 
+        // Initialize on load
         window.addEventListener('DOMContentLoaded', () => {
             renderCards();
             if (window.lucide) {
@@ -302,10 +273,10 @@
             const nav = document.getElementById('main-nav');
             if (window.scrollY > 50) {
                 nav.style.background = 'rgba(20, 22, 24, 0.95)';
-                nav.style.padding = '1.25rem 2rem';
+                nav.style.padding = '0.75rem 2rem';
             } else {
                 nav.style.background = 'rgba(26, 28, 30, 0.85)';
-                nav.style.padding = '1.5rem 2rem';
+                nav.style.padding = '1.25rem 2rem';
             }
         });
     </script>
