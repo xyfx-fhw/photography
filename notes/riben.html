@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>东瀛秋纪 - 摄影画册 | 雪云飞星</title>
+    <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root { --bg-color: #0f1112; --accent-color: #c5a059; --text-main: #e2e2e2; }
+        body { font-family: 'Noto Sans SC', sans-serif; background-color: var(--bg-color); color: var(--text-main); }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .masonry { column-count: 1; column-gap: 1.5rem; }
+        @media (min-width: 768px) { .masonry { column-count: 2; } }
+        @media (min-width: 1024px) { .masonry { column-count: 3; } }
+        .masonry-item { break-inside: avoid; margin-bottom: 1.5rem; transform: translateY(20px); opacity: 0; transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+        .masonry-item.loaded { transform: translateY(0); opacity: 1; }
+    </style>
+</head>
+<body class="antialiased">
+    <nav class="fixed top-0 w-full z-50 px-8 py-6 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent">
+        <a href="../index.html" class="flex items-center text-xs uppercase tracking-[0.3em] text-gray-400 hover:text-[#c5a059] transition-colors group">
+            <i data-lucide="arrow-left" class="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform"></i> 返回首页
+        </a>
+    </nav>
+
+    <header class="pt-40 pb-20 px-8 max-w-7xl mx-auto border-b border-white/5">
+        <div class="flex flex-col md:flex-row md:items-end justify-between">
+            <div>
+                <span class="text-[#c5a059] text-[10px] uppercase tracking-widest">Travel Log · 2026.10</span>
+                <h1 class="text-5xl md:text-7xl font-serif italic mt-4 mb-6 text-white">东瀛秋纪</h1>
+                <p class="text-gray-500 max-w-2xl leading-relaxed font-light text-sm">金阁寺的倒影、伏见稻荷的朱红、岚山的竹林与苔庭，在河口湖畔等待富士山破云而出。</p>
+            </div>
+            <div class="mt-8 md:mt-0 text-right">
+                <div class="flex items-center justify-end space-x-2 text-[#c5a059] mb-1">
+                    <i data-lucide="map-pin" class="w-4 h-4"></i>
+                    <span class="text-sm font-serif italic text-white text-right">日本 · 京都/奈良/富士山</span>
+                </div>
+                <p class="text-[10px] text-gray-600 tracking-tighter uppercase">Kyoto, Nara & Mt. Fuji</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="px-8 py-20 max-w-7xl mx-auto">
+        <div id="photo-grid" class="masonry"></div>
+    </main>
+
+    <div id="lightbox" class="fixed inset-0 bg-[#0a0a0a]/98 z-[100] hidden flex flex-col items-center justify-center p-4 cursor-zoom-out" onclick="closeLightbox()">
+        <img id="lightboxImg" class="max-w-full max-h-[90vh] shadow-2xl transition-transform duration-500 scale-95" src="">
+    </div>
+
+    <script>
+        function loadGallery() {
+            const photos = [
+        {
+                "url": "../images/riben/DSCF3522.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3522"
+        },
+        {
+                "url": "../images/riben/DSCF3523.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3523"
+        },
+        {
+                "url": "../images/riben/DSCF3526.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3526"
+        },
+        {
+                "url": "../images/riben/DSCF3531.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3531"
+        },
+        {
+                "url": "../images/riben/DSCF3532.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3532"
+        },
+        {
+                "url": "../images/riben/DSCF3535.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3535"
+        },
+        {
+                "url": "../images/riben/DSCF3539.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3539"
+        },
+        {
+                "url": "../images/riben/DSCF3541.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3541"
+        },
+        {
+                "url": "../images/riben/DSCF3543.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3543"
+        },
+        {
+                "url": "../images/riben/DSCF3546.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3546"
+        },
+        {
+                "url": "../images/riben/DSCF3557.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3557"
+        },
+        {
+                "url": "../images/riben/DSCF3559.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3559"
+        },
+        {
+                "url": "../images/riben/DSCF3565.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3565"
+        },
+        {
+                "url": "../images/riben/DSCF3566.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3566"
+        },
+        {
+                "url": "../images/riben/DSCF3570.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3570"
+        },
+        {
+                "url": "../images/riben/DSCF3571.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3571"
+        },
+        {
+                "url": "../images/riben/DSCF3573.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3573"
+        },
+        {
+                "url": "../images/riben/DSCF3574.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3574"
+        },
+        {
+                "url": "../images/riben/DSCF3590.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3590"
+        },
+        {
+                "url": "../images/riben/DSCF3594.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3594"
+        },
+        {
+                "url": "../images/riben/DSCF3597.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3597"
+        },
+        {
+                "url": "../images/riben/DSCF3601.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3601"
+        },
+        {
+                "url": "../images/riben/DSCF3603.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3603"
+        },
+        {
+                "url": "../images/riben/DSCF3607.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3607"
+        },
+        {
+                "url": "../images/riben/DSCF3613.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3613"
+        },
+        {
+                "url": "../images/riben/DSCF3615.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3615"
+        },
+        {
+                "url": "../images/riben/DSCF3616.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3616"
+        },
+        {
+                "url": "../images/riben/DSCF3618.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3618"
+        },
+        {
+                "url": "../images/riben/DSCF3620.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3620"
+        },
+        {
+                "url": "../images/riben/DSCF3621.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3621"
+        },
+        {
+                "url": "../images/riben/DSCF3622.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3622"
+        },
+        {
+                "url": "../images/riben/DSCF3623.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3623"
+        },
+        {
+                "url": "../images/riben/DSCF3634.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3634"
+        },
+        {
+                "url": "../images/riben/DSCF3642.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3642"
+        },
+        {
+                "url": "../images/riben/DSCF3645.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3645"
+        },
+        {
+                "url": "../images/riben/DSCF3658.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3658"
+        },
+        {
+                "url": "../images/riben/DSCF3659.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3659"
+        },
+        {
+                "url": "../images/riben/DSCF3660.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3660"
+        },
+        {
+                "url": "../images/riben/DSCF3661.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3661"
+        },
+        {
+                "url": "../images/riben/DSCF3664.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3664"
+        },
+        {
+                "url": "../images/riben/DSCF3668.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3668"
+        },
+        {
+                "url": "../images/riben/DSCF3669.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3669"
+        },
+        {
+                "url": "../images/riben/DSCF3670.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3670"
+        },
+        {
+                "url": "../images/riben/DSCF3674.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3674"
+        },
+        {
+                "url": "../images/riben/DSCF3676.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3676"
+        },
+        {
+                "url": "../images/riben/DSCF3692.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3692"
+        },
+        {
+                "url": "../images/riben/DSCF3696.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3696"
+        },
+        {
+                "url": "../images/riben/DSCF3698.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3698"
+        },
+        {
+                "url": "../images/riben/DSCF3699.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3699"
+        },
+        {
+                "url": "../images/riben/DSCF3701.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3701"
+        },
+        {
+                "url": "../images/riben/DSCF3702.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3702"
+        },
+        {
+                "url": "../images/riben/DSCF3705.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3705"
+        },
+        {
+                "url": "../images/riben/DSCF3706.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3706"
+        },
+        {
+                "url": "../images/riben/DSCF3707.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3707"
+        },
+        {
+                "url": "../images/riben/DSCF3708.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3708"
+        },
+        {
+                "url": "../images/riben/DSCF3711.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3711"
+        },
+        {
+                "url": "../images/riben/DSCF3716.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3716"
+        },
+        {
+                "url": "../images/riben/DSCF3720.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3720"
+        },
+        {
+                "url": "../images/riben/DSCF3735.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3735"
+        },
+        {
+                "url": "../images/riben/DSCF3737.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3737"
+        },
+        {
+                "url": "../images/riben/DSCF3743.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3743"
+        },
+        {
+                "url": "../images/riben/DSCF3745.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3745"
+        },
+        {
+                "url": "../images/riben/DSCF3750.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3750"
+        },
+        {
+                "url": "../images/riben/DSCF3756.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3756"
+        },
+        {
+                "url": "../images/riben/DSCF3761.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3761"
+        },
+        {
+                "url": "../images/riben/DSCF3763.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3763"
+        },
+        {
+                "url": "../images/riben/DSCF3766.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3766"
+        },
+        {
+                "url": "../images/riben/DSCF3768.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3768"
+        },
+        {
+                "url": "../images/riben/DSCF3769.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3769"
+        },
+        {
+                "url": "../images/riben/DSCF3771.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3771"
+        },
+        {
+                "url": "../images/riben/DSCF3772.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3772"
+        },
+        {
+                "url": "../images/riben/DSCF3773.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3773"
+        },
+        {
+                "url": "../images/riben/DSCF3779.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3779"
+        },
+        {
+                "url": "../images/riben/DSCF3780.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3780"
+        },
+        {
+                "url": "../images/riben/DSCF3782.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3782"
+        },
+        {
+                "url": "../images/riben/DSCF3785.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3785"
+        },
+        {
+                "url": "../images/riben/DSCF3788.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3788"
+        },
+        {
+                "url": "../images/riben/DSCF3791.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3791"
+        },
+        {
+                "url": "../images/riben/DSCF3793.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3793"
+        },
+        {
+                "url": "../images/riben/DSCF3794.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3794"
+        },
+        {
+                "url": "../images/riben/DSCF3797.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3797"
+        },
+        {
+                "url": "../images/riben/DSCF3799.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3799"
+        },
+        {
+                "url": "../images/riben/DSCF3804.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3804"
+        },
+        {
+                "url": "../images/riben/DSCF3805.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3805"
+        },
+        {
+                "url": "../images/riben/DSCF3806.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3806"
+        },
+        {
+                "url": "../images/riben/DSCF3807.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3807"
+        },
+        {
+                "url": "../images/riben/DSCF3815.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3815"
+        },
+        {
+                "url": "../images/riben/DSCF3819.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3819"
+        },
+        {
+                "url": "../images/riben/DSCF3833.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3833"
+        },
+        {
+                "url": "../images/riben/DSCF3836.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3836"
+        },
+        {
+                "url": "../images/riben/DSCF3837.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3837"
+        },
+        {
+                "url": "../images/riben/DSCF3847.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3847"
+        },
+        {
+                "url": "../images/riben/IMG_3452.webp",
+                "width": 5712,
+                "height": 4284,
+                "title": "IMG_3452"
+        },
+        {
+                "url": "../images/riben/IMG_4282.webp",
+                "width": 3024,
+                "height": 4032,
+                "title": "IMG_4282"
+        },
+        {
+                "url": "../images/riben/IMG_4300.webp",
+                "width": 4284,
+                "height": 5712,
+                "title": "IMG_4300"
+        },
+        {
+                "url": "../images/riben/IMG_4316.webp",
+                "width": 4284,
+                "height": 5712,
+                "title": "IMG_4316"
+        },
+        {
+                "url": "../images/riben/IMG_4334.webp",
+                "width": 5712,
+                "height": 4284,
+                "title": "IMG_4334"
+        },
+        {
+                "url": "../images/riben/IMG_4336.webp",
+                "width": 3024,
+                "height": 4032,
+                "title": "IMG_4336"
+        },
+        {
+                "url": "../images/riben/IMG_4340.webp",
+                "width": 4032,
+                "height": 3024,
+                "title": "IMG_4340"
+        },
+        {
+                "url": "../images/riben/IMG_4346.webp",
+                "width": 3024,
+                "height": 4032,
+                "title": "IMG_4346"
+        },
+        {
+                "url": "../images/riben/IMG_4359.webp",
+                "width": 4032,
+                "height": 3024,
+                "title": "IMG_4359"
+        },
+        {
+                "url": "../images/riben/IMG_4360.webp",
+                "width": 3024,
+                "height": 4032,
+                "title": "IMG_4360"
+        },
+        {
+                "url": "../images/riben/IMG_4361.webp",
+                "width": 4032,
+                "height": 3024,
+                "title": "IMG_4361"
+        },
+        {
+                "url": "../images/riben/IMG_4364.webp",
+                "width": 4032,
+                "height": 3024,
+                "title": "IMG_4364"
+        },
+        {
+                "url": "../images/riben/IMG_4366.webp",
+                "width": 4032,
+                "height": 3024,
+                "title": "IMG_4366"
+        },
+        {
+                "url": "../images/riben/IMG_4415.webp",
+                "width": 4284,
+                "height": 5712,
+                "title": "IMG_4415"
+        },
+        {
+                "url": "../images/riben/IMG_4427.webp",
+                "width": 4284,
+                "height": 5712,
+                "title": "IMG_4427"
+        },
+        {
+                "url": "../images/riben/IMG_4432.webp",
+                "width": 3024,
+                "height": 4032,
+                "title": "IMG_4432"
+        },
+        {
+                "url": "../images/riben/IMG_4438.webp",
+                "width": 3024,
+                "height": 4032,
+                "title": "IMG_4438"
+        },
+        {
+                "url": "../images/riben/IMG_4439.webp",
+                "width": 3024,
+                "height": 4032,
+                "title": "IMG_4439"
+        },
+        {
+                "url": "../images/riben/IMG_4443.webp",
+                "width": 5712,
+                "height": 4284,
+                "title": "IMG_4443"
+        },
+        {
+                "url": "../images/riben/IMG_4472.webp",
+                "width": 3024,
+                "height": 4032,
+                "title": "IMG_4472"
+        },
+        {
+                "url": "../images/riben/IMG_4477.webp",
+                "width": 4032,
+                "height": 3024,
+                "title": "IMG_4477"
+        },
+        {
+                "url": "../images/riben/IMG_4481.webp",
+                "width": 5712,
+                "height": 4284,
+                "title": "IMG_4481"
+        },
+        {
+                "url": "../images/riben/IMG_4484.webp",
+                "width": 4032,
+                "height": 3024,
+                "title": "IMG_4484"
+        },
+        {
+                "url": "../images/riben/IMG_4485.webp",
+                "width": 5712,
+                "height": 4284,
+                "title": "IMG_4485"
+        },
+        {
+                "url": "../images/riben/IMG_4489.webp",
+                "width": 3024,
+                "height": 4032,
+                "title": "IMG_4489"
+        },
+        {
+                "url": "../images/riben/IMG_4492.webp",
+                "width": 4032,
+                "height": 3024,
+                "title": "IMG_4492"
+        },
+        {
+                "url": "../images/riben/IMG_4505.webp",
+                "width": 4032,
+                "height": 3024,
+                "title": "IMG_4505"
+        },
+        {
+                "url": "../images/riben/IMG_4506.webp",
+                "width": 4032,
+                "height": 3024,
+                "title": "IMG_4506"
+        },
+        {
+                "url": "../images/riben/IMG_4509.webp",
+                "width": 5712,
+                "height": 4284,
+                "title": "IMG_4509"
+        },
+        {
+                "url": "../images/riben/IMG_4515.webp",
+                "width": 5712,
+                "height": 4284,
+                "title": "IMG_4515"
+        },
+        {
+                "url": "../images/riben/IMG_4523.webp",
+                "width": 5712,
+                "height": 4284,
+                "title": "IMG_4523"
+        },
+        {
+                "url": "../images/riben/IMG_4525.webp",
+                "width": 3024,
+                "height": 4032,
+                "title": "IMG_4525"
+        },
+        {
+                "url": "../images/riben/IMG_4527.webp",
+                "width": 5712,
+                "height": 4284,
+                "title": "IMG_4527"
+        },
+        {
+                "url": "../images/riben/IMG_4530.webp",
+                "width": 3024,
+                "height": 4032,
+                "title": "IMG_4530"
+        },
+        {
+                "url": "../images/riben/IMG_4531.webp",
+                "width": 5712,
+                "height": 4284,
+                "title": "IMG_4531"
+        },
+        {
+                "url": "../images/riben/IMG_4539.webp",
+                "width": 3024,
+                "height": 4032,
+                "title": "IMG_4539"
+        },
+        {
+                "url": "../images/riben/IMG_4544.webp",
+                "width": 4284,
+                "height": 5712,
+                "title": "IMG_4544"
+        },
+        {
+                "url": "../images/riben/IMG_4545.webp",
+                "width": 3024,
+                "height": 4032,
+                "title": "IMG_4545"
+        },
+        {
+                "url": "../images/riben/IMG_4552.webp",
+                "width": 5712,
+                "height": 4284,
+                "title": "IMG_4552"
+        },
+        {
+                "url": "../images/riben/IMG_4556.webp",
+                "width": 3024,
+                "height": 4032,
+                "title": "IMG_4556"
+        },
+        {
+                "url": "../images/riben/IMG_4562.webp",
+                "width": 3024,
+                "height": 4032,
+                "title": "IMG_4562"
+        },
+        {
+                "url": "../images/riben/IMG_4567.webp",
+                "width": 4032,
+                "height": 3024,
+                "title": "IMG_4567"
+        },
+        {
+                "url": "../images/riben/IMG_4568.webp",
+                "width": 3024,
+                "height": 4032,
+                "title": "IMG_4568"
+        },
+        {
+                "url": "../images/riben/IMG_4573.webp",
+                "width": 4284,
+                "height": 5712,
+                "title": "IMG_4573"
+        },
+        {
+                "url": "../images/riben/IMG_4575.webp",
+                "width": 4032,
+                "height": 3024,
+                "title": "IMG_4575"
+        },
+        {
+                "url": "../images/riben/IMG_4580.webp",
+                "width": 4032,
+                "height": 3024,
+                "title": "IMG_4580"
+        },
+        {
+                "url": "../images/riben/IMG_4591.webp",
+                "width": 4284,
+                "height": 5712,
+                "title": "IMG_4591"
+        },
+        {
+                "url": "../images/riben/IMG_4595.webp",
+                "width": 3024,
+                "height": 4032,
+                "title": "IMG_4595"
+        },
+        {
+                "url": "../images/riben/IMG_4605.webp",
+                "width": 4284,
+                "height": 5712,
+                "title": "IMG_4605"
+        },
+        {
+                "url": "../images/riben/IMG_4608.webp",
+                "width": 5712,
+                "height": 4284,
+                "title": "IMG_4608"
+        },
+        {
+                "url": "../images/riben/IMG_4609.webp",
+                "width": 5712,
+                "height": 4284,
+                "title": "IMG_4609"
+        },
+        {
+                "url": "../images/riben/IMG_4614.webp",
+                "width": 4032,
+                "height": 3024,
+                "title": "IMG_4614"
+        },
+        {
+                "url": "../images/riben/IMG_4620.webp",
+                "width": 5712,
+                "height": 4284,
+                "title": "IMG_4620"
+        },
+        {
+                "url": "../images/riben/IMG_4623.webp",
+                "width": 3024,
+                "height": 4032,
+                "title": "IMG_4623"
+        }
+];
+            const grid = document.getElementById('photo-grid');
+            if (!grid) return;
+            grid.innerHTML = photos.map(p => `
+                <div class="masonry-item group cursor-zoom-in overflow-hidden rounded-sm bg-neutral-900" onclick="openLightbox('${p.url}')">
+                    <img src="${p.url}" class="w-full h-auto hover:scale-[1.03] transition-transform duration-700" onload="this.parentElement.classList.add('loaded')" loading="lazy">
+                </div>
+            `).join('');
+            if(window.lucide) lucide.createIcons();
+        }
+
+        function openLightbox(src) {
+            const lb = document.getElementById('lightbox');
+            const img = document.getElementById('lightboxImg');
+            img.src = src;
+            lb.classList.remove('hidden');
+            setTimeout(() => img.classList.remove('scale-95'), 10);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox() {
+            const lb = document.getElementById('lightbox');
+            const img = document.getElementById('lightboxImg');
+            img.classList.add('scale-95');
+            setTimeout(() => { lb.classList.add('hidden'); document.body.style.overflow = 'auto'; }, 300);
+        }
+
+        window.onload = loadGallery;
+    </script>
+</body>
+</html>

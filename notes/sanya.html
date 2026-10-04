@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>琼岛晴夏 - 摄影画册 | 雪云飞星</title>
+    <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root { --bg-color: #0f1112; --accent-color: #c5a059; --text-main: #e2e2e2; }
+        body { font-family: 'Noto Sans SC', sans-serif; background-color: var(--bg-color); color: var(--text-main); }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .masonry { column-count: 1; column-gap: 1.5rem; }
+        @media (min-width: 768px) { .masonry { column-count: 2; } }
+        @media (min-width: 1024px) { .masonry { column-count: 3; } }
+        .masonry-item { break-inside: avoid; margin-bottom: 1.5rem; transform: translateY(20px); opacity: 0; transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+        .masonry-item.loaded { transform: translateY(0); opacity: 1; }
+    </style>
+</head>
+<body class="antialiased">
+    <nav class="fixed top-0 w-full z-50 px-8 py-6 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent">
+        <a href="../index.html" class="flex items-center text-xs uppercase tracking-[0.3em] text-gray-400 hover:text-[#c5a059] transition-colors group">
+            <i data-lucide="arrow-left" class="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform"></i> 返回首页
+        </a>
+    </nav>
+
+    <header class="pt-40 pb-20 px-8 max-w-7xl mx-auto border-b border-white/5">
+        <div class="flex flex-col md:flex-row md:items-end justify-between">
+            <div>
+                <span class="text-[#c5a059] text-[10px] uppercase tracking-widest">Travel Log · 2026.06</span>
+                <h1 class="text-5xl md:text-7xl font-serif italic mt-4 mb-6 text-white">琼岛晴夏</h1>
+                <p class="text-gray-500 max-w-2xl leading-relaxed font-light text-sm">蜈支洲岛清澈见底的海水、洁白沙滩与椰林树影，定格一整个盛夏的蓝。</p>
+            </div>
+            <div class="mt-8 md:mt-0 text-right">
+                <div class="flex items-center justify-end space-x-2 text-[#c5a059] mb-1">
+                    <i data-lucide="map-pin" class="w-4 h-4"></i>
+                    <span class="text-sm font-serif italic text-white text-right">中国 · 海南三亚</span>
+                </div>
+                <p class="text-[10px] text-gray-600 tracking-tighter uppercase">Sanya & Wuzhizhou Island</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="px-8 py-20 max-w-7xl mx-auto">
+        <div id="photo-grid" class="masonry"></div>
+    </main>
+
+    <div id="lightbox" class="fixed inset-0 bg-[#0a0a0a]/98 z-[100] hidden flex flex-col items-center justify-center p-4 cursor-zoom-out" onclick="closeLightbox()">
+        <img id="lightboxImg" class="max-w-full max-h-[90vh] shadow-2xl transition-transform duration-500 scale-95" src="">
+    </div>
+
+    <script>
+        function loadGallery() {
+            const photos = [
+        {
+                "url": "../images/sanya/DSCF3003.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3003"
+        },
+        {
+                "url": "../images/sanya/DSCF3007.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3007"
+        },
+        {
+                "url": "../images/sanya/DSCF3016.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3016"
+        },
+        {
+                "url": "../images/sanya/DSCF3049.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3049"
+        },
+        {
+                "url": "../images/sanya/DSCF3057.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3057"
+        },
+        {
+                "url": "../images/sanya/DSCF3058.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3058"
+        },
+        {
+                "url": "../images/sanya/DSCF3059.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3059"
+        },
+        {
+                "url": "../images/sanya/DSCF3060.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3060"
+        },
+        {
+                "url": "../images/sanya/DSCF3062.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3062"
+        },
+        {
+                "url": "../images/sanya/DSCF3064.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3064"
+        },
+        {
+                "url": "../images/sanya/DSCF3066.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3066"
+        },
+        {
+                "url": "../images/sanya/DSCF3068.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3068"
+        },
+        {
+                "url": "../images/sanya/DSCF3069.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3069"
+        },
+        {
+                "url": "../images/sanya/DSCF3074.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3074"
+        },
+        {
+                "url": "../images/sanya/DSCF3077.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3077"
+        },
+        {
+                "url": "../images/sanya/DSCF3087.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3087"
+        },
+        {
+                "url": "../images/sanya/DSCF3111.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3111"
+        },
+        {
+                "url": "../images/sanya/DSCF3118.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3118"
+        },
+        {
+                "url": "../images/sanya/DSCF3126.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3126"
+        },
+        {
+                "url": "../images/sanya/DSCF3135.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3135"
+        },
+        {
+                "url": "../images/sanya/DSCF3139.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3139"
+        },
+        {
+                "url": "../images/sanya/DSCF3146.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3146"
+        },
+        {
+                "url": "../images/sanya/DSCF3147.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3147"
+        },
+        {
+                "url": "../images/sanya/DSCF3148.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3148"
+        },
+        {
+                "url": "../images/sanya/DSCF3149.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3149"
+        },
+        {
+                "url": "../images/sanya/DSCF3150.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3150"
+        },
+        {
+                "url": "../images/sanya/DSCF3151.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3151"
+        },
+        {
+                "url": "../images/sanya/DSCF3154.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3154"
+        },
+        {
+                "url": "../images/sanya/DSCF3189.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3189"
+        },
+        {
+                "url": "../images/sanya/DSCF3190.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3190"
+        },
+        {
+                "url": "../images/sanya/DSCF3193.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3193"
+        },
+        {
+                "url": "../images/sanya/DSCF3213.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3213"
+        },
+        {
+                "url": "../images/sanya/DSCF3214.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3214"
+        },
+        {
+                "url": "../images/sanya/DSCF3217.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3217"
+        },
+        {
+                "url": "../images/sanya/DSCF3218.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3218"
+        },
+        {
+                "url": "../images/sanya/DSCF3219.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3219"
+        },
+        {
+                "url": "../images/sanya/DSCF3220.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3220"
+        },
+        {
+                "url": "../images/sanya/DSCF3250.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3250"
+        },
+        {
+                "url": "../images/sanya/DSCF3260.webp",
+                "width": 2560,
+                "height": 3840,
+                "title": "DSCF3260"
+        },
+        {
+                "url": "../images/sanya/DSCF3261.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3261"
+        },
+        {
+                "url": "../images/sanya/DSCF3272.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3272"
+        },
+        {
+                "url": "../images/sanya/DSCF3275.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3275"
+        },
+        {
+                "url": "../images/sanya/DSCF3279.webp",
+                "width": 3840,
+                "height": 2560,
+                "title": "DSCF3279"
+        }
+];
+            const grid = document.getElementById('photo-grid');
+            if (!grid) return;
+            grid.innerHTML = photos.map(p => `
+                <div class="masonry-item group cursor-zoom-in overflow-hidden rounded-sm bg-neutral-900" onclick="openLightbox('${p.url}')">
+                    <img src="${p.url}" class="w-full h-auto hover:scale-[1.03] transition-transform duration-700" onload="this.parentElement.classList.add('loaded')" loading="lazy">
+                </div>
+            `).join('');
+            if(window.lucide) lucide.createIcons();
+        }
+
+        function openLightbox(src) {
+            const lb = document.getElementById('lightbox');
+            const img = document.getElementById('lightboxImg');
+            img.src = src;
+            lb.classList.remove('hidden');
+            setTimeout(() => img.classList.remove('scale-95'), 10);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox() {
+            const lb = document.getElementById('lightbox');
+            const img = document.getElementById('lightboxImg');
+            img.classList.add('scale-95');
+            setTimeout(() => { lb.classList.add('hidden'); document.body.style.overflow = 'auto'; }, 300);
+        }
+
+        window.onload = loadGallery;
+    </script>
+</body>
+</html>
